@@ -1,0 +1,40 @@
+version: '3.8'
+# для деталей загляни в  [readme](./readme.ad)
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    hostname: pihole
+    cap_add:
+      - NET_ADMIN
+    networks:
+      dkr_net:
+        ipv4_address: 192.168.1.251
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    volumes:
+      - '/srv/pihole/:/etc/pihole/'
+      - '/srv/dnsmasq/:/etc/dnsmasq.d/'
+    ports:
+      - 443:443/tcp
+      - 53:53/tcp
+      - 53:53/udp
+      - 80:80/tcp
+    environment:
+      TZ: ${TZ}
+      VIRTUAL_HOST: pihole
+      WEBPASSWORD: ${WEBPASSWORD}
+    restart: unless-stopped
+
+networks: 
+  dkr_net:
+    name: docker_network
+    driver: macvlan
+    driver_opts:
+      parent: enp3s0
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+          gateway: 192.168.1.2
+          ip_range: 192.168.1.240/28

@@ -1,0 +1,31 @@
+:sectnums:
+:toc: left
+== net-mod
+для контейнеров будет выделена подсеть типа С со старшими адресами:
+192.168.1.241 - 192.168.1.254
+
+калькулятор https://www.subnet-calculator.com/[подсести] высичтывает, что подходящая маска 192.168.1.240/28
+
+получить имя сетевого интерфейса можно командой `ip a`
+у меня это enp3s0
+
+=== pihole
+референсы на полезные ресурсы
+- https://docs.pi-hole.net/
+- https://github.com/pi-hole/docker-pi-hole/
+- http://tonylawrence.com/posts/unix/synology/free-your-synology-ports/#fn:single
+
+=== howto
+[source,yaml]
+----
+include::docker-compose.yaml[конфиг для инициирования сети]
+----
+
+
+for daemonize `sudo docker-compose up -d pihole`
+
+test link: http://192.168.1.251/admin/
+
+sudo docker-compose stop pihole
+
+sudo docker exec -it pihole bash

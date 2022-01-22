@@ -1,2 +1,0 @@
-# corcosa
-omv on debian

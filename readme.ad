@@ -1,0 +1,31 @@
+= corcosa
+:checkedbox: pass:normal[{startsb}&#10004;{endsb}]
+:sectnums:
+:toc: left
+:toclevels: 4
+:icons: font
+:experimental:
+
+:disk_hdd: dev-disk-by-uuid-bd72f3d3-c890-4315-b2e2-a15b15df1564
+:disk_ssd: dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd
+
+== about
+HTPC setup description
+
+== host
+omv5 on debian10
+```
+Client: Docker Engine - Community
+ Version:           20.10.12
+ API version:       1.41
+ Go version:        go1.16.12
+ OS/Arch:           linux/amd64
+```
+
+include::host/prerequisites.ad[]
+
+include::host/yandex.ad[]
+
+include::host/omv.ad[]
+
+include::host/docker.ad[]

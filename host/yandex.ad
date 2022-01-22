@@ -1,0 +1,88 @@
+:sectnums:
+:toc: left
+
+== yandex-disk
+Будет использоваться для хранения и доставки
+
+- музыки
+- торрект файлов
+
+
+=== по проще
+Заметки по установке и первичной настройке: https://yandex.ru/support/disk-desktop-linux/start.html
+ 
+типовое содержание конфига `~/.config/yandex-disk/config.cfg`
+
+[source]
+-----------
+include::config.cfg[]
+-----------
+
+
+=== по сложнее
+Проверка синхронизации `yandex-disk status` покажет не только статус, но и последние синхронизированные файлы.
+
+Если такая информация не нужна, стоит демонизировать с использованием systemctl. Для начала пошелудим руками конфиги
+```
+cd ~/.config/yandex-disk/
+mv config.cfg config.cfg.backup
+vim config.cfg
+```
+в него пропишем
+[source]
+----
+auth="/etc/yandex-disk/passwd"
+dir="/srv/{disk_hdd}/yndx"
+proxy="no"
+exclude-dirs="distr,droid,family,household,library,mobile,photos,personal,portable,vidos,Загрузки,Скриншоты,Фотокамера,Work"
+----
+просинкаем `yandex-disk status start`, 
+притушим `yandex-disk status stop` 
+и автоматизируем c https://habr.com/ru/company/southbridge/blog/255845/[Systemd за пять минут]
+
+```
+yandex-disk stop
+yandex-disk token passwd
+yandex-disk status
+mv ~/.config/yandex-disk /etc
+ls -la /etc/yandex-disk/passwd
+touch /etc/systemd/system/yandex-disk.service
+vim /etc/systemd/system/yandex-disk.service
+```
+
+в него пропишем
+[source]
+----
+[Unit]
+Description=Yandex.Disk
+Requires=network.target
+After=network.target network-online.target
+
+[Service]
+Type=forking
+User=enot
+Group=users
+ExecStart=/usr/bin/yandex-disk start -c /etc/yandex-disk/config.cfg
+RestartSec=1min
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+----
+
+и попробуем
+```
+systemctl --system daemon-reload
+systemctl start yandex-disk.service
+systemctl status yandex-disk.service
+yandex-disk status
+systemctl enable yandex-disk.service
+```
+Если нужно подебажить, то читаем логи `journalctl -f -u yandex-disk.service`, которые скорее всего не показывают причины ошибки.
+Ищем процесс `systemctl show --property MainPID --value yandex-disk.service` берем его пид и подставляем в 
+`cat /proc/PID/cmdline` и смотрим не накосячили ли где.
+
+P.S. системд не очень нравится, так как после демонизации нельзя напрямую обратиться к `yandex-disk status`.
+При таком вызове из под непривилегированного пользователя, приложение будет с обычной областью видимости и не найдет ни конфиги ни токен.
+
+А добраться до уже запущенного процесса и обратиться к нему за статусом - не возможно, даже если отыскать его пид.
