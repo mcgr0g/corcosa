@@ -16,16 +16,16 @@
 - http://tonylawrence.com/posts/unix/synology/free-your-synology-ports/#fn:single
 
 === howto
+просто запихни в портейнер этот конфиг
 [source,yaml]
 ----
-include::docker-compose.yaml[конфиг для инициирования сети]
+include::docker-compose.yaml[]
 ----
 
+`.env` файл сделай по аналоигии c `example.env`
 
-for daemonize `sudo docker-compose up -d pihole`
+запускаем `sudo docker-compose up -d pihole`
 
-test link: http://192.168.1.251/admin/
+админка: http://192.168.1.251/admin/
 
-sudo docker-compose stop pihole
-
-sudo docker exec -it pihole bash
+если любопытно, можно пошариться по контейнеру `sudo docker exec -it pihole bash`
