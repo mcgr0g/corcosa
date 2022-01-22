@@ -11,12 +11,8 @@
 === по проще
 Заметки по установке и первичной настройке: https://yandex.ru/support/disk-desktop-linux/start.html
  
-типовое содержание конфига `~/.config/yandex-disk/config.cfg`
+link:config.cfg[конфиг] обычно находится по адресу `~/.config/yandex-disk/config.cfg`
 
-[source]
------------
-include::config.cfg[]
------------
 
 
 === по сложнее

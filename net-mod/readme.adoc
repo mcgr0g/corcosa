@@ -11,16 +11,14 @@
 
 === pihole
 референсы на полезные ресурсы
+
 - https://docs.pi-hole.net/
 - https://github.com/pi-hole/docker-pi-hole/
-- http://tonylawrence.com/posts/unix/synology/free-your-synology-ports/#fn:single
+- http://tonylawrence.com/posts/unix/synology/free-your-synology-ports
 
 === howto
 просто запихни в портейнер этот конфиг
-[source,yaml]
-----
-include::docker-compose.yaml[]
-----
+link:docker-compose.yaml[конфиг]
 
 `.env` файл сделай по аналоигии c `example.env`
 
