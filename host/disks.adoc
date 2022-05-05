@@ -1,0 +1,144 @@
+=== диски
+В системе диски могут быть не примонтированы автоматом, чекни `lsblk -f`
+
+Диски монтируются с GUID меткой без человечачьего названия, надо сначала узнать кто есть кто через `df -h`, он покажет
+```
+/dev/sdb1       938G   77M  938G   1% /srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd
+/dev/sdd1       1.8T   44K  1.7T   1% /srv/dev-disk-by-uuid-b2f9a5d4-ea0f-44d0-9ce9-d72536fbdcb0
+/dev/sdc2       3.3T   44K  3.2T   1% /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c
+```
+И вот теперь становится яcно что
+
+- hdd main: {disk_main}
+- hdd backup: {disk_bkup}
+- ssd : {disk_ssd}
+
+Нет понятных меток? Поставь через e2label метки: nox под ссд и kech под шпиндель и станет проще.
+```
+sudo e2label /dev/sda1 nox
+sudo e2label /dev/sdb2 nixData
+sudo e2label /dev/sdc1 nixBkup
+```
+
+==== ssd nox
+Для быстрого доступа к дискам виртуалки, собственным поделкам.
+Например - в виртуалке можно настроить jupiterlab, а хранилище ноутов ipynb расположить в пробрасываемой в виртуалку файловой системе.
+В свою очередь пробрасываемую файловую систему можно указать SMB серверу в качестве цели.
+С помощью этой цепочки будет довольно просто извлекать работающие исходники на локальный компьютер для упаковки домашнего задания к сдаче.
+
+Нужно будет в его корне выполнить
+```
+# под горячие файлы
+mkdir kiosk
+chown enot:users kiosk
+chmod -R 4775 kiosk
+```
+
+==== hdd main
+будет под торренты и кеш
+стоит помнить про целевую структуру каталогов https://wiki.servarr.com/docker-guide#examples необходимых медиа менеджерам
+```
+# под конфиги всяких образов
+mkdir configs
+chown bender:users configs
+chmod -R 4775 configs
+
+# под свалку
+mkdir barn
+chown enot:users barn
+chmod -R 4775 barn
+
+# под бэкапы
+mkdir alcove
+chown enot:users alcove
+chmod -R 4775 alcove
+
+# под яндекс диск
+mkdir yandex
+chown enot:users yandex
+chmod -R 4755 yandex
+
+# под кеш, в том числе торсерва
+mkdir cache
+chown enot:users cache
+chmod -R 4755 cache
+cd cache && mkdir torrserver
+
+# под видосики
+mkdir media
+chown enot:users media
+chmod -R 4775 media
+#тут нужно выйти из sudo в пользователя enot
+cd media && mkdir torrents ready
+
+cd torrents
+mkdir movies tv 
+
+cd ../ready
+mkdir movies tv yt-dlp
+```
+
+в итоге структура каталогов будет выглядеть так:
+```
+tree -dL 3
+
+.
+├── alcove
+│   └── manual
+├── barn
+│   └── user1
+├── cache
+│   └── torrserver
+├── configs
+│   ├── jackett
+│   ├── organizr
+│   ├── qbittorrent
+│   ├── radarr
+│   ├── sonarr
+│   └── ts
+├── media
+│   ├── ready
+│   │   ├── movies
+│   │   ├── tv
+│   │   └── yt-dlp
+│   ├── torrents
+│   │   ├── blackhole
+│   │   ├── downloads
+│   │   ├── history
+│   │   ├── incomplete
+│   │   ├── kid
+│   │   ├── movies
+│   │   ├── soft
+│   │   └── tv
+│   └── ytb
+└── yandex
+    ├── Music
+    ├── blackhole
+    └── project
+        └── corcosa
+```
+
+==== hdd backup
+```
+# под ручные бэкапы
+mkdir manual
+chown enot:users manual && chmod -R 4775 manual
+
+# под скриптовые бэкапы
+mkdir avtokleftika
+chown bender:users avtokleftika && chmod -R 4775 avtokleftika
+```
+
+==== livehacks
+Ходить по таким дискам достаточно долго и нудно, даже с автокомплитом.
+Для таких вещей и придумали алиасы. Можно сделать `cd ~ && vim .bash_aliases` и подкинуть в него
+```
+alias cd..='cd ..'
+alias ..='cd ..'
+alias ...='cd ../../../'
+alias path='echo -e ${PATH//:/\\n}'
+alias nox='cd /srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd'
+alias nixdata='cd /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c'
+alias nixbkup='cd /srv/dev-disk-by-uuid-b2f9a5d4-ea0f-44d0-9ce9-d72536fbdcb0'
+```
+a затем применить `source ~/.bash_aliases`
