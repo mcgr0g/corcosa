@@ -1,0 +1,27 @@
+Иногда нужно скинуть пару сезонов на флешку перед отпуском.
+При таких сценариях пользоваться https://openmediavault.readthedocs.io/en/latest/plugins.html[планином] `USB Backup` несколько не удобно.
+Тут исключительно ручная возня.
+
+Для начала нужно определить что и с какой маской прав будем копировать. В прошлых сериях было:
+```
+cd /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c/media/torrents/downloads
+ls -la
+drwxrwxr-x+ 5 enot   users       4096 Apr 29 01:30 ..
+-rw-rw-r--  1 bender users 2132796010 Apr 29 01:01 Riverdale.S01E01.1080p.TV.mkv
+id bender
+uid=1003(bender) gid=100(users) groups=100(users)
+id
+uid=1004(enot) gid=100(users) groups=100(users),27(sudo),111(ssh)
+```
+Теперь id юзера и группы известны. Отчет по доступным устройствам `lsblk -f` подсказывает, что не примонтированным висит
+```
+sde
+├─sde1
+└─sde2 ntfs         dale         A252235B52233407
+```
+примонтируем его в кастомную директорию
+```
+mkdir /mnt/usb
+ntfs-3g -o rw,uid=1004 /dev/sde2 /mnt/usb
+```
+поделали свои дела и отмонтируем `sudo umount /mnt/usb`

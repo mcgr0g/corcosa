@@ -1,0 +1,46 @@
+:sectnums:
+:toc: left
+== intro
+По мотивам https://forum.openmediavault.org/index.php?thread/39510-how-to-use-the-openmediavault-kvm-plugin/[\[How-To\] Use the Openmediavault-KVM plugin] 
+можно сделать себе виртуалку и под домашнюю автоматизацию и просто для поделок.
+
+=== storage
+Использоваться будет китайский SSD, не системный.
+нужно подготовить место хранения дисков так, что бы процес виртуализации был владельцем и мог запускать все что нужно. Пользакам будет нужен доступ на запись что бы копировать скачанные iso'шники в целевой каталог
+```
+cd /srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd/
+mkdir vm-store
+chown libvirt-qemu:users vm-store
+chmod -R 6775 vm-store
+cd vm-store && mkdir pool  && mkdir iso
+```
+
+В UI KVM → Pools → Add → Path 
+выберем `/srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd/vm-store/pool`
+и назовем pool-01
+
+=== network
+Предполагается, что ее уже link:net.adoc[подготовили]. Теперь просто всегда выбирается бридж br0
+
+=== cpu
+Производительность важна. Если воткнете обычный `x86 qemu64`, то все не будет крайне медленно исполняться, используйте `host host-passthrough`. Если не робит, значит у вас или куцый проц и материнка или вы забыли включить VT-x в биосе. Или у вас батарейка села.
+Это прям без шуток, пока я носил десктоп туда-сюда батарейка не могла подпитывать энергозависимую память и настройки в биоса слетали.
+Если все же любопытно, в качетсве какого билд сервера можно использовать ваш комп (например aarch64), то для начала нужно установить ваш процессор и возможные к использованию эмулируемые процессоры.
+`virsh -c qemu:///system capabilities`
+и смотрите в модель хоста. Дальнейшие подробности найдете на  
+https://opennebula.io/selecting-the-right-cpu-model-on-kvm-x86-hosts/
+
+Для примера мой link:qemu-capabilities.xml[output]
+Если вдруг кому интересно, то дефолтный интерфейс omv создает виртуалки со следующими link:vm-current.xml[параметрами].
+
+==== hass
+https://www.home-assistant.io/
+Одна из самых активно развивающихся систем умного дома.
+Как и все остальные системы - разрабатывается энтузиастами с использованием скриптов, по этому все предлагают ставить не через докер, а на голое железо или в виртуальную машину.
+Так по счастью есть "сборка" для KVM https://www.home-assistant.io/installation/alternative
+
+```
+cd /srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd/vm-store/pool/
+wget https://github.com/home-assistant/operating-system/releases/download/7.5/haos_ova-7.5.qcow2.xz
+xz -d haos_ova-7.5.qcow2.xz
+```
