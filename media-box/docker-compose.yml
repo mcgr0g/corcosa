@@ -52,7 +52,7 @@ services:
     container_name: torproxy
     image: mcgr0g/talpa-altaica:latest
     environment:
-     ExcludeExitNodes: '{RU},{UA},{AM},{KG},{BY}'
+     EXCLUDE_NODE: '{RU},{UA},{AM},{KG},{BY}'
     ports:
     - 8118:8888 # подмена порта из-за коллизии
     - 8119:8889
