@@ -1,0 +1,6 @@
+#EXTM3U 
+#PLAYLIST:OnwTone Local Stream
+
+#EXTINF:-1 tvg-name="OnwTone" tvg-logo="http://192.168.2.10:3689/apple-touch-icon.png?ver=2.0", OnwTone
+#EXTGRP:LocalStream
+http://192.168.2.10:3689/stream.mp3

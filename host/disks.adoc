@@ -1,5 +1,6 @@
-=== диски
-В системе диски могут быть не примонтированы автоматом, чекни `lsblk -f`
+=== раскручиваем диски
+В системе диски могут быть не примонтированы автоматом, чекни `lsblk -f`.
+Монтировать стоит через UI, он там всякие проверки делает и запоминает гуйды дисков.
 
 Диски монтируются с GUID меткой без человечачьего названия, надо сначала узнать кто есть кто через `df -h`, он покажет
 ```
@@ -9,16 +10,25 @@
 ```
 И вот теперь становится яcно что
 
-- hdd main: {disk_main}
-- hdd backup: {disk_bkup}
-- ssd : {disk_ssd}
+- hdd media: {disk_media}
+- hdd media2: {disk_bkp}
+- ssd : {disk_os}
 
 Нет понятных меток? Поставь через e2label метки: nox под ссд и kech под шпиндель и станет проще.
 ```
 sudo e2label /dev/sda1 nox
-sudo e2label /dev/sdb2 nixData
-sudo e2label /dev/sdc1 nixBkup
+sudo e2label /dev/sdb2 nixMedia
+sudo e2label /dev/sdc1 nixBkp
 ```
+
+=== остановка дисков
+Вообще говоря она вредна, потому что частая паркова головок уменьшает срок их жизни. Не даром есть SMART показатель load_cycle_count.
+Форумчане поделились заметками
+
+> advanced power management values up to 127 use spin down
+> 128-255 are without spin down
+
+и стоит ставить значение 128 в честь этого, если диски поддерживают AMP. Если нет - то пусть крутятся вечно.
 
 ==== ssd nox
 Для быстрого доступа к дискам виртуалки, собственным поделкам.
@@ -34,14 +44,14 @@ chown enot:users kiosk
 chmod -R 4775 kiosk
 ```
 
-==== hdd main
+==== hdd media
 будет под торренты и кеш
 стоит помнить про целевую структуру каталогов https://wiki.servarr.com/docker-guide#examples необходимых медиа менеджерам
 ```
 # под конфиги всяких образов
-mkdir configs
-chown bender:users configs
-chmod -R 4775 configs
+mkdir appdata
+chown -R bender:docker-adm appdata
+chmod -R 4775 appdata
 
 # под свалку
 mkdir barn
@@ -58,18 +68,11 @@ mkdir yandex
 chown enot:users yandex
 chmod -R 4755 yandex
 
-# под кеш, в том числе торсерва
-mkdir cache
-chown enot:users cache
-chmod -R 4755 cache
-cd cache && mkdir torrserver
-
-# под видосики
-mkdir media
-chown enot:users media
-chmod -R 4775 media
-#тут нужно выйти из sudo в пользователя enot
-cd media && mkdir torrents ready
+# под  загрузки видосики, кеш, в том числе торсерва
+mkdir data
+chown -R bender:docker-adm data
+chmod -R 4755 data
+cd data && mkdir media cache
 
 cd torrents
 mkdir movies tv 
@@ -80,53 +83,58 @@ mkdir movies tv yt-dlp
 
 в итоге структура каталогов будет выглядеть так:
 ```
-tree -dL 3
+tree -dL 4
 
 .
-├── alcove
-│   └── manual
+├── appdata
+│   ├── copier
+│   │   └── cups
+│   ├── media-box
+│   │   ├── jackettflared
+│   │   ├── jackettproxy
+│   │   ├── organizr
+│   │   ├── plex
+│   │   ├── qbittorrent
+│   │   ├── radarr
+│   │   ├── sonarr
+│   │   └── torrserver
+│   └── portainer
 ├── barn
-│   └── user1
-├── cache
-│   └── torrserver
-├── configs
-│   ├── jackett
-│   ├── organizr
-│   ├── qbittorrent
-│   ├── radarr
-│   ├── sonarr
-│   └── ts
-├── media
-│   ├── ready
-│   │   ├── movies
-│   │   ├── tv
-│   │   └── yt-dlp
-│   ├── torrents
-│   │   ├── blackhole
-│   │   ├── downloads
-│   │   ├── history
-│   │   ├── incomplete
-│   │   ├── kid
-│   │   ├── movies
-│   │   ├── soft
-│   │   └── tv
-│   └── ytb
+│   ├── devbooks
+│   ├── distrib
+│   │   └── ide
+│   └── knop
+├── data
+│   ├── cache
+│   └── media
+│       ├── ready
+│       │   ├── movies
+│       │   └── tv
+│       ├── torrents
+│       │   ├── abook
+│       │   ├── blackhole
+│       │   ├── book
+│       │   ├── downloads
+│       │   ├── history
+│       │   ├── kid
+│       │   ├── movies
+│       │   ├── music
+│       │   ├── serial
+│       │   ├── soft
+│       │   └── webinar
+│       └── ytb
+│           ├── blues
+│           ├── music shows
+│           └── webinar
+├── lost+found [error opening dir]
+├── www-data
+│   └── dummy
+│       └── html
 └── yandex
     ├── Music
     ├── blackhole
     └── project
         └── corcosa
-```
-
-==== hdd backup
-```
-# под ручные бэкапы
-mkdir manual
-chown enot:users manual && chmod -R 4775 manual
-
-# под скриптовые бэкапы
-mkdir avtokleftika
-chown bender:users avtokleftika && chmod -R 4775 avtokleftika
 ```
 
 ==== livehacks
@@ -137,8 +145,7 @@ alias cd..='cd ..'
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias path='echo -e ${PATH//:/\\n}'
-alias nox='cd /srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd'
-alias nixdata='cd /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c'
-alias nixbkup='cd /srv/dev-disk-by-uuid-b2f9a5d4-ea0f-44d0-9ce9-d72536fbdcb0'
+alias nixmedia='cd /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c'
+alias nixbkp='cd /srv/dev-disk-by-uuid-b2f9a5d4-ea0f-44d0-9ce9-d72536fbdcb0'
 ```
 a затем применить `source ~/.bash_aliases`

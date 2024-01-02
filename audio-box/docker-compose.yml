@@ -1,0 +1,32 @@
+---
+version: "3.8"
+# name: audio-box
+# about: https://github.com/mcgr0g/corcosa
+services:
+
+  owntone: # https://owntone.github.io/owntone-server/outputs/streaming/
+    container_name: owntone
+    image: lscr.io/linuxserver/daapd:latest
+    environment:
+      PUID: ${PUID2} # redefined global .env in compose .env
+      PGID: ${PGID2} # redefined global .env in compose .env
+      TZ: ${TZ}
+    volumes:
+      - ./owntone:/config
+      - ${MUSIC}:/music
+    network_mode: host
+    restart: unless-stopped
+  
+  mstream:
+    image: lscr.io/linuxserver/mstream:latest
+    container_name: mstream
+    environment:
+      PUID: ${PUID2}
+      PGID: ${PGID2}
+      TZ: ${TZ}
+    volumes:
+      - ./mstream:/config
+      - ${MUSIC}:/music
+    ports:
+      - 3000:3000
+    restart: unless-stopped

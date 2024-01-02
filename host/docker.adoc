@@ -4,44 +4,67 @@
 
 Ставится в систему через экстра плагины https://wiki.omv-extras.org/
 
-Мой сетап позволял не переносить служебный каталог на примонтированный диск. Если вам нужно, просто поменяйте путь в Docker Storage.
+C Июля 2023 больше никакого Portainer со всеми красивостями вам не светит, разве что только на чтение. Статистика вам будет отображаться в куцых табличках omv, re-pull будет работать через раз, а самое главное логи вы хрен так же удобно почитаете, если что то не взлетает. Такая цена за решение ментейнеров все плагины текущие плагины заворачивать в контейнеры и запускать через podman.
 
-Portainer - крутой проект и стоит ставить именно его, тем более что он сам устанавливается в образе.
+Бонусом к новым проблемам будет необходимость заководить кучу "шареных" каталогов через GUI, что бы можно были их вказать в том же GUI композера.
+Не сказал бы что это в разы удобнее 1 композ файла и одного env файла для указания статических путей. Но возможно тем кто вообще не хочет притрагиваться к консоли - это будет выглядеть более выигрышно.
 
-Больше общих рекомендаций нет, можно конфигурить софт.
-Его можно разделить на 2 группы:  
+=== Какой ворох каталогов нужен
+Если пробежаться по актуальному на 2023 мануалу https://wiki.omv-extras.org/doku.php?id=omv6:docker_in_omv#folders_and_locations_to_use_docker-compose_with_the_plug-in
+(кстати недоступному злым русским)
 
-- качалки, отдавалки. Общее название media-box
-- баннерорезки, разблокировщики. Общее назначение net-mod
+data - помойка с контентом от qbit, radarr, sonarr. Нужна была и раньше, нужна и сейчас. Но почему то назвают ее `data folder`. Будет с лейблом `dkr-content`.
 
-Довольно удобно подключать компоузы из веб интерфейса. Для link:../media-box/readme.adoc[media-box] В новом стеке заполняем:
+appdata - барахло для конфигов. Нужна была и раньше. Но предлагают ее теперь держать недалеко от бинарей докера и слоев контейнеров. Идут нахер, будем держать рядом с контентом, что бы удобнее было проверять те же права на пользователя и группу. Лейбл шаред каталога будет `dkr-appdata`. Указывать его потребуется в Services > Compose > Settings.
+Есть какой то красноглазый прикол, что если назначить его владельцем bender:docker-adm, то обычному пользователю не будет туда доступа, даже если он состоит в группе docker-adm. Нужно явно себя прокликать в ACL на R\W доступ.
 
-[%autowidth%header,separator=|]
-|===
-| параметр | назначение | пример 
+backup_appdata - говорит само за себя. Находиться будет на системном SSD, что бы когда отрыгнет HDD с контентом и конфигами - можно было быстро восстановиться.  Лейбл шаред каталога будет `dkr-appdata-bkp`.
 
-| Repository URL
-| путь до корня репозитария
-| https://github.com/mcgr0g/corcosa
+docker - каталог с бинарями, контейнерами и прочей внутрянкой, по канону в `/var/lib/docker`. Нет смысла двагить, будет лежать на своем месте. Только школьники бутаются с крохотной флешки, нормальные ребята ставят нормальный SSD и для ОСи и для нужного приклада. В UI распознается сам, отдельный шаренный каталог ему не нужно, не смотря на то, что в мануалах предлагают создать.
 
-| Repository reference
-| инструкция использовать в качестве указателя опраделенную ветку [в этом примере]
-| refs/heads/main
+=== troubleshooting
 
-| Compose path
-| путь от корня репозитария на файловой системе до компоуз файла
-| media-box/docker-compose.yaml
+==== Сервис докера не найден
+Видать не успел создаться, пока salt прокручивал шаги.
+Просто забей и примени значения еще раз. Вырезка из логов ниже.
+```
+----------
+          ID: docker
+    Function: service.running
+      Result: False
+     Comment: The named service docker is not available
+     Started: 23:50:19.782181
+    Duration: 12.635 ms
+     Changes:
+----------
+Summary for stone.local
+-------------
+Succeeded: 12 (changed=2)
+Failed:     1
+-------------
+Total states run:     13
+Total run time:   35.008 s
+[ERROR   ] The named service docker is not available in /usr/share/php/openmediavault/system/process.inc:242
+Stack trace:
+#0 /usr/share/php/openmediavault/engine/module/serviceabstract.inc(62): OMV\System\Process->execute()
+#1 /usr/share/openmediavault/engined/rpc/config.inc(178): OMV\Engine\Module\ServiceAbstract->deploy()
+#2 [internal function]: Engined\Rpc\Config->applyChanges(Array, Array)
+#3 /usr/share/php/openmediavault/rpc/serviceabstract.inc(123): call_user_func_array(Array, Array)
+#4 /usr/share/php/openmediavault/rpc/serviceabstract.inc(149): OMV\Rpc\ServiceAbstract->callMethod('applyChanges', Array, Array)
+#5 /usr/share/php/openmediavault/rpc/serviceabstract.inc(620): OMV\Rpc\ServiceAbstract->OMV\Rpc\{closure}('/tmp/bgstatusNB...', '/tmp/bgoutputJC...')
+#6 /usr/share/php/openmediavault/rpc/serviceabstract.inc(159): OMV\Rpc\ServiceAbstract->execBgProc(Object(Closure))
+#7 /usr/share/openmediavault/engined/rpc/config.inc(199): OMV\Rpc\ServiceAbstract->callMethodBg('applyChanges', Array, Array)
+#8 [internal function]: Engined\Rpc\Config->applyChangesBg(Array, Array)
+#9 /usr/share/php/openmediavault/rpc/serviceabstract.inc(123): call_user_func_array(Array, Array)
+#10 /usr/share/php/openmediavault/rpc/rpc.inc(86): OMV\Rpc\ServiceAbstract->callMethod('applyChangesBg', Array, Array)
+#11 /usr/sbin/omv-engined(537): OMV\Rpc\Rpc::call('Config', 'applyChangesBg', Array, Array, 1)
+#12 {main}
+```
 
-|===
+=== глобальные переменные
+Лежат от ни по интуитивному пути в GUI: Services > Compose > Files
+Menu > Edit global environment file
+Но вот пиктограммы там не очень релевантные, надо наводится мышкой и читать ховер.
 
-image::portainer stack setup.png[конфиги стэка для подсасывания из github]
+Есть неожиданная приятность, что при задании шаред каталога appdata, теперь путь до конфигов можно задавать как `./<app-name>:/config` и встроенные башизмы сами создадут каталог `appdapta/<compoze-file-name>/<app-name>` и нацелят его в каталог `/config`
 
-== where is logs?
-Часто при неудачно составленном компоузе, Portainer сыплет ошибками в всплывающее окно. Прощелкал клювом - окно закрылось. 
-А даже если и не закрылось, то в окно пишется контекст логов и там будет лишняя информация, которая может сбивать с толку. Нужно смотреть обычные плосские логи.
-
-Где? В WEB UI.
-
-Всего то и нужно ткнуть нужную кнопку
-
-image::portainer logs.png[где лежат логи]

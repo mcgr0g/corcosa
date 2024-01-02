@@ -1,6 +1,6 @@
 :toc: left
 :toclevels: 4
-== media-box
+== video-box
 
 === references
 Наработки взяты из мануалов
@@ -31,6 +31,7 @@
 moovie = '/media/torrents/movies'
 serial = '/media/torrents/serial'
 radarr = '/media/torrents/movies'
+sonarr = '/media/torrents/serial'
 
 Хак с отдельной категорией для радара и сонара упрощает жизнь в реалиях отчечественных трекеров. 
 В PVR можно настроить категорию для скачивания и пост категорию для готового фильма. При этом фильм не будет считаться готовым, если PVR не смог его сграбить автоматом. А один чудный трекер постоянно отдает в названии торрента "rutor.info" вместо имени темы или названия файла. И radarr имено так его и показыват в своем интерфейс для импорта контента. По этому каждый раз в интерфейсе qbit приходится править название торрента по имени файлу руками. И гораздо проще найти это непотребство фильтранувшись по категории.
@@ -42,6 +43,25 @@ radarr = '/media/torrents/movies'
 для проверки аптайма анонсера можно воспользоваться https://newtrackon.com/
 
 Скорее всего большая часть будет заблокирована, стоит использовать https://github.com/bluet/proxybroker2
+
+==== SSL и магнит
+Если очень хочется по одному простому клику добавлять торренты, это можно, но геморрно.
+в UI зарегистрировать веб приложение как обработчик магнет ссылок можно в 1 клик, проблема только в том, что приклад требует выпуск SSL сертификатов в обязательном порядке.
+Есть 2 варианта: выпустить из консоли или из под UI: https://docs.openmediavault.org/en/latest/administration/general/certificates.html#ssl-secure-socket-layer
+
+Правда потом все равно потребуется из под консоли скопировать или сделать симлинк на сертификаты.
+Я решил выпустить из UI, что бы можно было легко проверять как долго осталось до истечения серта и мне пришлось так раскидать файлы
+```
+cd /srv/dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c/appdata/video-box/qbittorrent
+mkdir ssl && cd ssl
+cp /etc/ssl/private/openmediavault-9a1df8c9-b47b-48f8-a42d-42c60a75d5ae.key privatekey
+cp /etc/ssl/certs/openmediavault-9a1df8c9-b47b-48f8-a42d-42c60a75d5ae.crt cert
+```
+и после в конфигах qgit можно их прописывать в ⚙ → Web UI → Use HTTPS instead of HTTP:
+Certificate: `/config/ssl/cert`
+Key: `/config/ssl/privatekey`
+
+IMPORTANT: После применения настроек по http зайти уже не получится, только по https.
 
 === TorrServer 
 Проект https://github.com/YouROK/TorrServer работает даже на android боксах. 
@@ -85,7 +105,7 @@ ls -la /opt/ts/
 
 [[torrent-indexer]]
 === Jackett
-Он не сможет работать в наших реалиях без flaresolverr и tor (а лучше VPN). 
+Он не сможет работать в наших реалиях без flaresolverr и tor (или VPN). 
 При этом скорость взаимодействия будет очень медленной. Так что для первичного запуска стоит воспользоваться torproxy, а потом тюнить конфиги для более быстрого соединения через vpn туннель.
 При дефолтных настройках контейнеров,
 
@@ -126,6 +146,55 @@ ls -la /opt/ts/
 - FlareSolverr Max Timeout (ms): `105000` из-за неторопливости tor
 
 После добавления любимых трекеров стоит их протестировать и поискать какие-нибудь новинки. Если все отлично, то на этом стадия первичного запуска считается завершенной.
+
+==== The cookies provided by FlareSolverr are not valid
+Довольно старая https://github.com/FlareSolverr/FlareSolverr/issues/89[проблема], на самом деле, поставщик кук это jackett и него есть попытки описать способы https://github.com/Jackett/Jackett/wiki/TroubleShooting/#your-cookie-did-not-work[преодоления] проблемы.
+
+=== vpn client
+При использовании платного VPN следует помнить, что jackett и flaresolverr должны быть за одним ip, использовать одни и теже куки, без ipv6
+https://github.com/FlareSolverr/FlareSolverr/issues/664#issuecomment-1374505316[про куки для Cloudflare]
+https://github.com/FlareSolverr/FlareSolverr/issues/89#issuecomment-1004753308[про ipv6]
+
+По этой причине конфиг vpn должен выглядеть примерно так
+```docker
+  ovpnc:
+    container_name: ovpnc
+    image: dperson/openvpn-client:latest
+    cap_add:
+      - net_admin # required to modify network interfaces
+    ports:
+      - 8191:8191 # хак с высовыванием порта для flaresolverr
+      - 9117:9117 # хак с высовыванием порта для jackett
+    environment:
+      TZ: ${TZ} # timezone, defined in .env
+    volumes:
+      - ${ROOT}/configs/ovpnc:/vpn # OpenVPN configuration
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:latest
+    environment:
+      PUID: ${PUID} # default user id, defined in .env
+      PGID: ${PGID} # default group id, defined in .env
+      TZ: ${TZ} # timezone, defined in .env
+    network_mode: service:ovpnc # run on the ovpnc network
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: service:ovpnc # run on the ovpnc network
+```
+Кстати, это один из немногих ментейнеров, которые сразу в мануале указали не только как присоединить сетевой стек vpn клиента к подопытному контейнеру приклада, но и как сделать реверс-проксирование.
+К сожалению, запуск с платным vpn не был аппробирован. Запуск с бесплатным vpn - описан ниже.
+
+==== antizapret
+Ни для кого не секрет, что проект антизапрета использует openvpn и выбор достаточно богат.
+Однако https://github.com/dperson/openvpn-clien[популярные сбоки] нуджно тюнить, из-за их киллсвитч режима (проксируй или умри):
+Сервер антизапрета определяет, какие домены заблокированы и отклоняет такие соединения.
+А они могут быть использованы для служебного использования в healthchecker, например у https://ntc.party/t/flaresolverr-vpn/3175[Flaresolverr]. Пока корректной докер сборки - нет.
+
 
 === radarr
 качает фильмы
@@ -244,9 +313,39 @@ SOCKS5, localhost, 9050
 Но есть обходной маневр: руками через jacket найти нужный фильм, скачать torrent файл, а при добавлении его в <<qbit>> поставить категорию radarr.
 Тогда сервис заметит его в попытается сграбить. Даже если у него не получится, то можно ему подмогнуть через Grab selected
 
+===== повышенная утилизация дисков.
+По умолчанию radarr использует тактику создания хардлинков вместо копирования. Но он может переключиться на копирование, если файл заблокирован каким либо процессом, например сидированием. При этом эти господа не позаботились функцией остановкой (паузой) торрекнта, даже при наличии API и предлагают руками его останавливать, импортировать закачаное и потом включать.
+
+в UI
+/dev/sde2 nixMedia Available:1.31 TiB Used: 1.80 TiB
+
+в консли df -h
+Filesystem      Size  Used Avail Use%
+/dev/sde2       3.3T  1.9T  1.4T  58%
+/dev/sde2       3439013 1888078   1376172  58%
+
+в консли du -sh на корне диска
+1.9T
+
+После , тяжелого файла, импорта с отключенными торрентарми,  показатели не изменятся, а хардлинк будет установлен: чило 2 напротив .mkv файла говорит об этом.
+```
+ls -la
+total 57912108
+drwxrwxr-x+   2 bender docker-adm        4096 Dec 25 02:18  .
+drwsrwxr-x+ 107 bender docker-adm       12288 Dec 25 02:17  ..
+-rwxrwxr-x+   2 bender docker-adm 59300739524 Mar 25  2022 'Joker (2019) Remux-2160p.mkv'
+-rw-rw-r--+   1 bender docker-adm        8690 Dec 25 02:18 'Joker (2019) Remux-2160p.nfo'
+-rw-rw-r--+   1 bender docker-adm      299647 Dec 25 02:17  fanart.jpg
+-rw-rw-r--+   1 bender docker-adm      815122 Dec 25 02:17  poster.jpg
+
+```
+
 === sonarr
 Качает сериалы. Настраивается аналогично, но сериалы добавляются руками, а не через какой-нибудь внешний список к просмотру.
 
+=== ручной импорт
+Если ты затупил и не поставил нужную категорию на торренте в qbit, то ее установка на "нужную" уже после завершения скачивания не поможет, файлы не будет видно в Activity Menu.
+Но зато, если переключиться в Wanted → Missing, то можно выделить серии которые ожидаются к загрузке в sonarr и сделать Manual Import, указав каталог, в который была загрузка.
 
 include::plex/plex-configure.adoc[]
 

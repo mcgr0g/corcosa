@@ -1,4 +1,7 @@
+---
 version: "3.8"
+# name: video-box
+# about: https://github.com/mcgr0g/corcosa
 services:
 
   organizr:
@@ -9,26 +12,9 @@ services:
       PGID: ${PGID}
       TZ: ${TZ}
     volumes:
-      - ${ROOT}/configs/organizr:/config
+      - ./organizr:/config
     ports:
       - 888:80
-    restart: unless-stopped
-
-  qbittorrent: # https://github.com/linuxserver/docker-qbittorrent
-    image: linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    environment:
-      WEBUI_PORT: 8080
-      PUID: ${PUID}
-      PGID: ${PGID}
-    volumes:
-      - ${ROOT}/configs/qbittorrent:/config
-      - ${ROOT}/media:/media
-      - ${ROOT}/yandex/blackhole:/blackhole
-    ports:
-      - 6881:6881 # tcp connection port
-      - 8080:8080 # http gui
-      - 9001:9001 # tracker port
     restart: unless-stopped
 
   torproxy:
@@ -37,21 +23,37 @@ services:
     environment:
       EXCLUDE_NODE: '{RU},{UA},{AM},{KG},{BY}'
     ports: 
-      - 8888:8888 # подмена порта из-за коллизии
+      - 8888:8888
       - 8119:8889
       - 9050:9050/tcp
     restart: unless-stopped
-  jackettproxy: # версия сервиса для работы через медленный torproxy, но зато с flaresolverr
+
+  jackettproxy: # версия сервиса для работы через медленный torproxy, без flaresolverr
     container_name: jackettproxy
     image: linuxserver/jackett:latest
     environment:
-      PUID: ${PUID} # default user id, defined in .env
-      PGID: ${PGID} # default group id, defined in .env
-      TZ: ${TZ} # timezone, defined in .env
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/configs/jackettproxy:/config # config files
-      - ${ROOT}/yandex/blackhole:/downloads # place where to put .torrent files for manual download
+      - ./jackettproxy:/config
+      - ${ROOT}/media/torrents/blackhole:/downloads # place where to put .torrent files for manual download
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+
+  jackettflared: # версия сервиса для работы через медленный torproxy, и с flaresolverr
+    container_name: jackettflared
+    image: linuxserver/jackett:latest
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./jackettflared:/config
+      - ${ROOT}/media/torrents/blackhole:/downloads # place where to put .torrent files for manual download
     ports:
       - 9118:9117
     restart: unless-stopped
@@ -66,19 +68,35 @@ services:
       TZ: ${TZ}
     ports:
       - 8191:8191
-    restart: unless-stopped 
+    restart: unless-stopped
+
+  qbittorrent: # https://github.com/linuxserver/docker-qbittorrent
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      WEBUI_PORT: 8080
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ./qbittorrent:/config
+      - ${ROOT}/media:/media
+    ports:
+      - 6881:6881 # tcp connection port
+      - 8080:8080 # http gui
+      - 9001:9001 # tracker port
+    restart: unless-stopped
 
   sonarr: # сериалы
     container_name: sonarr
     image: linuxserver/sonarr:latest
     network_mode: host
     environment:
-      PUID: ${PUID} # default user id, defined in .env
-      PGID: ${PGID} # default group id, defined in .env
-      TZ: ${TZ} # timezone, defined in .env
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/configs/sonarr:/config # config files
+      - ./sonarr:/config
       - ${ROOT}/media:/media # both downloads & media folders folder
     ports:
       - 8989:8989
@@ -91,9 +109,10 @@ services:
     environment:
       PUID: ${PUID} # default user id, defined in .env
       PGID: ${PGID} # default group id, defined in .env
+      TZ: ${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${ROOT}/configs/radarr:/config # config files
+      - ./radarr:/config # config files
       - ${ROOT}/media:/media # both downloads & media folders folder
     ports:
       - 7878:7878
@@ -107,13 +126,14 @@ services:
       PLEX_UID: ${PUID} # default user id, defined in .env
       PLEX_GID: ${PGID} # default group id, defined in .env
       HOSTNAME: stone
-      ADVERTISE_IP: http://stone.lan:32400, http://192.168.2.10:32400
+      ADVERTISE_IP: http://stone.local:32400, http://192.168.2.10:32400
       ALLOWED_NETWORKS: 192.168.2.0/24
     volumes:
-      - ${ROOT}/configs/plex/db:/config # plex database
+      - ./plex/db:/config # plex database
+      - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования
       - ${ROOT}/cache/plex/transcode:/transcode # temp transcoded files
       - ${ROOT}/media:/media # media library
-      - ${ROOT}/yandex/Music:/music # music library
+      # - ${ROOT}/yandex/Music:/music # music library
     devices:
     - /dev/dri:/dev/dri # https://github.com/plexinc/pms-docker#intel-quick-sync-hardware-transcoding-support
     ports:
@@ -121,7 +141,6 @@ services:
       - 3005:3005/tcp
       - 8324:8324/tcp
       - 32469:32469/tcp
-      # - 1900:1900/udp # conflict with baremetal miniDLNA
       - 32410:32410/udp
       - 32412:32412/udp
       - 32413:32413/udp
@@ -131,7 +150,7 @@ services:
   metube: # выкачивалка ютуба
     image: alexta69/metube
     container_name: metube
-    user: "${PUID}:${PGID}"
+    #vuser: "${PUID}:${PGID}"
     ports:
       - 8081:8081
     volumes:
@@ -143,9 +162,9 @@ services:
     image: ghcr.io/yourok/torrserver:latest 
     hostname: torrserver
     domainname: torrserver.lan
-    user: "${PUID}:${PGID}"
+    # user: "${PUID}:${PGID}"
     volumes:
-      - '${ROOT}/configs/ts:/opt/ts/config'
+      - './ts:/opt/ts/config'
       - '${ROOT}/cache/torrserver:/opt/ts/torrents'
     ports:
       - 8090:8090 # http streaming

@@ -12,6 +12,8 @@ https://github.com/OpenMediaVault-Plugin-Developers/installScript/blob/master/in
 Для OMV6 хак не работает, omv-extras встает не корректно, через webUI система крашится и уходит в режим только на чтение.
 Нужно ставить на deiban server.
 
+Следом можно поставить экстра плагины по маналу https://github.com/OpenMediaVault-Plugin-Developers/installScript/
+
 === конфиги вводное
 Есть несколько нюансов:
 
@@ -19,12 +21,14 @@ https://github.com/OpenMediaVault-Plugin-Developers/installScript/blob/master/in
 - пользаков стоит создавать не скриптом, а в UI. Самопальные скрипты можно выкинуть.
 - при создании пользователи будут добавляться в группу users сами. Но нужно будет самостоятельно добавить их в группу ssh доступа. Об этом ниже.
 - Какое то время получится жить с dhcp. Но стоит заранее на роутере выбрать красивый статичный ip.
+- PGID=100 будет у встроенной группы users. Что бы узнать PGID новой группы надо в веб интерфесе прожамкать скрытую колонку сделать, аналогично с PUID для пользователей.
+
 
 
 ==== конфиги ssh
 Cамопальным https://github.com/mcgr0g/rancho/blob/master/buben/config_sshd.sh[скриптом] конфигурить sshd бесполезно, скрипты UI беспощадно перезатирают.
 Обязательно нужно добавлять пользаков в группу ssh, что бы подключиться по этому протоколу.
-Если отключил парольную авторизацию, нужно в редактировании пользков добавить публичные ключи.
+Если отключил парольную авторизацию, нужно в редактировании пользаков добавить публичные ключи.
 
 Разумно оставить одного https://github.com/mcgr0g/rancho/tree/master/buben#%D1%82%D0%B8%D0%BF%D0%BE%D0%B2%D1%8B%D0%B5-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D0%B8-users[образенного] (не в группе судоеров) пользователя с включенным парольным доступом. 
 Как? У сервиса в спец секции Etra options можно прописать
@@ -43,7 +47,7 @@ Match all
 По сети вы сможете зайти и восстановить конфиг, потом примонтировать старые устройства.
 Или новые устройства. Или старые устройства с новыми партициями, а значит с новыми UID.
 
-Так что именно в этот момент подключайтесь по ssh идите в `cd cd /etc/openmediavault` и сохраняйте рядом
+Так что именно в этот момент подключайтесь по ssh идите в `cd /etc/openmediavault` и сохраняйте рядом
 `sudo cp config.xml config.xml.initial_setup`
 
 Если вы где то накосорезили, то потом по ssh делаете `sudo omv-firstaid` и выбираете "restore configuration backup"
@@ -68,10 +72,10 @@ append_custom_hosts:
 
 а в свои хосты для добавления `sudo vim /etc/hosts2`
 ```
-163.172.167.207 bt.t-ru.org
-163.172.167.207 bt2.t-ru.org
-163.172.167.207 bt3.t-ru.org
-163.172.167.207 bt4.t-ru.org
+172.64.199.20 bt.t-ru.org
+172.64.198.20 bt2.t-ru.org
+172.64.198.20 bt3.t-ru.org
+172.64.198.20 bt4.t-ru.org
 ```
 
 После нужно применить `omv-salt deploy run hosts`
@@ -85,11 +89,62 @@ append_custom_hosts:
 В комментарии стоит указать `bridge to eth card enp3s0`. 
 В IPv4 нужно указать static метод, в моем случае параметры 
 
-- Addres 192.168.1.10
+- Addres 192.168.2.10
 - Netmask 255.255.255.0
-- Gateway 192.168.1.2
+- Gateway 192.168.2.1
 
-DNS я бы не трогал прямо сейчас: сейчас можно будет пользоваться DNS службой роутера, а позже указать адрес кэширующего прокси
+DNS я бы не трогал прямо сейчас: сейчас можно будет пользоваться DNS службой роутера, а позже указать адрес кэширующего прокси.
+
+По этому важно в Advanced settings прописать DNS nameserver, под лейблом "DNS server": `192.168.2.1`. В противном случае новые репозитарии, такие как docker-ce он даже не сможет найти в интернете.
+
+==== каталоги
+минимальный набор каталогов, которые нужно будет создать из под UI
+
+[%autowidth%header,separator=|]
+|===
+| название | где | назначение | ACL
+
+| appdata
+| {disk_media}/appdata/
+| хранятся конфиги докер стэков
+| bender:r+w, docker-adm: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| backup_appdata
+| {disk_ssd}/backup_appdata/
+| бэкап докер стеков
+| bender:r+w, docker-adm: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| data
+| {disk_media}/data/
+| каталог проброски внутрь докер образов, пробрасывается в env'ы
+| bender:r+w, docker-adm: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| torrents
+| {disk_media}/data/media/torrents
+| для проброски в minidlna, на случай если отрыгнет плекс или радар
+| bender:r+w, docker-adm: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| youtube
+| {disk_media}/data/media/ytb
+| для проброски в minidlna записей из youtube
+| bender:r+w, docker-adm: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| barn
+| {disk_media}/barn
+| для smb шары и переброски конфигов и apk между телеками
+| enot:r+w, users: r+w, enot:r+w, lisa:r+w, stub:ro
+
+| blackhole
+| {disk_media}/yandex/blackhole
+| для синхронизации музыки проброса в daap приклад
+| enot:r+w, bender: r+w
+
+| music
+| {disk_media}/yandex/Music
+| для синхронизации музыки проброса в daap приклад
+| enot:r+w, bender: r+w
+
+|===
 
 ==== конфиги шары
 Надо начинать с конфигов ФС: корректно создать каталоги и права доступа к ним
@@ -135,12 +190,12 @@ cat /etc/samba/smb.conf
 ```
 
 и сделать проверочки на win клиенте:
-`dir \\STONE\media`
+`dir \\STONE\data`
 а потом из под админа `Get-SmbConnection`
 
 проверка доступов к шаре: `net net view \\stone`
 
-примонтирование дисков (не из под админа): `net use m: \\stone\media /USER:enot *`
+примонтирование дисков (не из под админа): `net use m: \\stone\data /USER:enot *`
 обрати внимание, что домен указывать не нужно.
 
 если еще не робит, то вот топ проблем с форума, в которые наступил сам.
@@ -164,7 +219,7 @@ cat /etc/samba/smb.conf
 Перезапуститься важно, у меня без этого залипала.
 
 ===== система взяла и добавила шару
-Скорее всего вы при удалении пыли пошевелили шлейфы или села батарейка и теперь у разделов новые UID.
+Скорее всего вы при удалении пыли пошевелили шлейфы или села батарейка биоса и теперь у разделов новые UID.
 
 Вариантов не так много: попробовать восстановить в /etc/openmediavault/config.xml разделы <fstab>.<mntent>
 через omv-firstaid
@@ -220,6 +275,18 @@ lsblk -f
 
 Скорее всего ситуация возникла поторму что откат изменений не прошел до конца. Нужно в рунчую сделать одну фазу
 `omv-salt deploy run fstab`
+
+Если помогло, то ок. Если CPU по чуть чуть утилизируется чем то, то стоит проверить syslog на предмет ошибок
+```
+Oct 24 00:16:27 stone monit[1256]: Lookup for '/srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd' filesystem failed  -- not found in /proc/self/mounts
+Oct 24 00:16:27 stone monit[1256]: Filesystem '/srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd' not mounted
+Oct 24 00:16:27 stone monit[1256]: 'filesystem_srv_dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd' unable to read filesystem '/srv/dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd' state
+```
+Это значит функции мониторинга куда то запомнили себе наличие удаленой ФС и было неплохо перестроить их настройки.
+```
+omv-salt stage run prepare
+omv-salt deploy run monit
+```
 
 === reinstall
 

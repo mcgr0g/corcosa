@@ -34,4 +34,6 @@ include::host/omv.adoc[]
 
 include::host/docker.adoc[]
 
-include::media-box/media.adoc[]
+include::video-box/video.adoc[]
+
+include::host/diskpool.adoc[]
