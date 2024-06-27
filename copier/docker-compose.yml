@@ -1,0 +1,39 @@
+---
+# stack copier
+services:
+  printer:
+  # https://github.com/anujdatar/cups-docker
+  # https://hub.docker.com/r/olbat/cupsd
+    container_name: cups
+    # image: olbat/cupsd:stable-2024-05-17
+    image: anujdatar/cups:latest
+    environment:
+      CUPSADMIN: admin
+      CUPSPASSWORD: secret
+      TZ: ${TZ}
+    volumes:
+      - ./cupsd:/etc/cups
+      - /var/run/dbus:/var/run/dbus
+    ports:
+      - 631:631
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    restart: unless-stopped
+  scanner:
+    # https://sbs20.github.io/scanservjs/
+    container_name: scanservjs
+    image: foxxmd/scanservjs:latest
+    volumes:
+      - ./scanservjs:/etc/scanservjs
+      - /var/run/dbus:/var/run/dbus
+      - ${ROOT}/scan:/var/lib/scanservjs/output
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    ports:
+      - 632:8080
+    environment:
+      SANED_NET_HOSTS: 192.168.2.10
+      # HP_AIO: true
+      HP_PLUGIN: true
+    privileged: true
+    restart: unless-stopped

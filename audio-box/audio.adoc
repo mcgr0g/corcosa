@@ -16,25 +16,39 @@
 ==== broadcast streaming
 В наше время каждый второй обвешивается TV-box'ами и на них то и можно стримить.
 
-===== snapcast
-Честрый мультирум с зонами, сложный и забористый.
-Стоит начать ознакомление с https://habr.com/ru/articles/510544/ и https://github.com/StalkerSVR/snapcast-multiroom
-Там местами хардкод в конфигах, стоит ознакомиться с оригинальным https://github.com/badaix/snapcast#setup-of-audio-playersserver
-и с чужими пресетами из
-- https://github.com/nolte/docker-snapcast
-- https://github.com/sweisgerber/docker-snapcast
-
-НО у всего проекта есть одно огромное ограничение, они не работают с tv-box на андроиде, только с RPi и его клонами,
-так как им нужно очень много из полноценного linux стека.
-Но можно попробовать AirReceiver для андроид https://4pda.to/forum/index.php?showtopic=1051809&view=findpost&p=126566916
-
 ===== OwnTone
 Но если не нужны фичи раздельных зон, то можно резануть косты и воспользоваться только одним прикладом без мозгодробящих настроек.
 
 Можно сделать в локалке сетевой плейлист через тот же icecast или даже через https://owntone.github.io/owntone-server/outputs/streaming/ попробовать подключиться к http://192.168.2.10:3689/stream.mp3. Он есть в `OnwTone.m3u`
 Но это на любителя, логичнее поставить AirReceiver и явно управлять из приложения.
+См для андроид боксов https://4pda.to/forum/index.php?showtopic=1051809&view=findpost&p=126566916
 
-А еще ему можно скормить плейлист онлайн радио, например `Radio Record (AAC 96).m3u8` в 
+
+А еще ему можно скормить плейлист онлайн радио, например `Radio Record (AAC 96).m3u8`
+
+===== snapcast
+Честный мультирум с зонами, сложный и забористый.
+Стоит начать ознакомление с https://habr.com/ru/articles/510544/
+и https://github.com/StalkerSVR/snapcast-multiroom
+Там местами хардкод в конфигах, стоит ознакомиться с оригинальным https://github.com/badaix/snapcast#setup-of-audio-playersserver
+и с чужими пресетами из
+- https://github.com/nolte/docker-snapcast
+- https://github.com/sweisgerber/docker-snapcast
+
+НО у всего проекта есть одно ограничение, они не работают с tv-box на андроиде, только с RPi и его клонами, так как им нужно очень много из полноценного linux стека. 
+Но это обходится с помощью AirReceiver.
+
+====== источники
+Если с файлами все понятно, то самой желанной опцией для милинеалов стримить радио или чужие плейлисты. Рестриминг радио вполне умеет owntone. А вот стримить яндекс музыку - не умеет.
+
+Тут потребуется лютая цепочка:
+
+. устанавливается сервер музыки https://docs.mopidy.com/en/latest/installation/
+. в него доставляется пакет https://github.com/stffart/mopidy-yamusic
+    берет авторизует тебе и сохраняет куку
+. и еще один https://mopidy.com/ext/mobile/
+    славный UI
+. он интегрируется со snapcast https://docs.mopidy.com/en/latest/installation/
 
 === public streaming
 Уже классический стриминг. При этом широковещание так же может по разному интерпретироваться.

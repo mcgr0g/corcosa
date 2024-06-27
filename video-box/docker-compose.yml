@@ -1,6 +1,6 @@
 ---
 version: "3.8"
-# name: video-box
+# name: media-box
 # about: https://github.com/mcgr0g/corcosa
 services:
 
@@ -155,6 +155,8 @@ services:
       - 8081:8081
     volumes:
       - ${ROOT}/media/ytb:/downloads
+    environment:
+      CUSTOM_DIRS: true
     restart: unless-stopped
 
   torrserver: # выкачивает торренты в ram. Можно перенстроить на хранение кеша из ram на hdd, но непонятно ради чего

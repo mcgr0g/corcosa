@@ -6,20 +6,20 @@
 :icons: font
 :experimental:
 
-:disk_main: dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c
-:disk_bkup: dev-disk-by-uuid-b2f9a5d4-ea0f-44d0-9ce9-d72536fbdcb0
-:disk_ssd: dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd
+:disk_os: dev-disk-by-uuid-defeb500-44b5-4d90-90de-5f38c2eb66dd
+:disk_media: dev-disk-by-uuid-5df3d4ad-0414-4018-a3c9-bd248ee5fa4c
+:disk_bkp: dev-disk-by-uuid-4198a3de-d9a2-44cf-a24d-439a1f97308e
 
 == about
 HTPC setup description
 
 == why
-Почему бы не использовать связку ugoos (tox1 или Tanix-TX9s), torrserver и NUM?
+Почему бы не использовать связку ugoos (tox1 или Tanix-TX9s), torrserver, NUM и VPN? Ну или Lampa и torrserver?
 Можете использовать.
 
 Однако:
 
- - Непопулярные раздачи aka "blabla в гоблинской озвучке" где стоят 1,5 калеки на раздаче, вы не посомтрите в онлайне, нужно предварительно скачивать
+ - Непопулярные раздачи aka "blabla в гоблинской озвучке" где стоят 1,5 калеки на раздаче, вы не посмотрите в онлайне, нужно предварительно скачивать
  - торрент в принципе подразумевает некий альтруизм: скачал раздай хотя бы с месяцок. А TS по умолчанию чистит кеш
  - можно автоматизировать список для скачивания (используя imdb)
  - если в доме 3 телека, то ценник 3*ugoos + 3*телека будет выше, чем 3*телека и HTPC с DLNA. Раза в 3:)
@@ -34,6 +34,8 @@ include::host/omv.adoc[]
 
 include::host/docker.adoc[]
 
+include::host/diskpool.adoc[]
+
 include::video-box/video.adoc[]
 
-include::host/diskpool.adoc[]
+include::audio-box/audio.adoc[]
