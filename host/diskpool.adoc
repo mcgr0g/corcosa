@@ -25,7 +25,9 @@
 https://thenomadcode.tech/mergerfs-snapraid-is-the-new-raid-5
 
 ==== megrerfs
-Для простого обывателя он делает ровно то что нужно - объединяет файловые системы (читай папки) в 1. Но есть сложности с радарром: https://github.com/trapexit/mergerfs#tips--notes, плексом https://github.com/trapexit/mergerfs#plex-doesnt-work-with-mergerfs 
+Для простого обывателя он делает ровно то что нужно - объединяет файловые системы (читай папки) в 1. Но есть сложности 
+- с радарром: https://github.com/trapexit/mergerfs#tips--notes
+- c плексом https://github.com/trapexit/mergerfs#plex-doesnt-work-with-mergerfs 
 
 Частое решение использовать mmap https://github.com/trapexit/mergerfs#you-need-mmap-used-by-rtorrent-and-many-sqlite3-base-software
 
@@ -48,18 +50,20 @@ https://thenomadcode.tech/mergerfs-snapraid-is-the-new-raid-5
 пуллинг снапрейда использует симликни и вот так просто пошарить каталог по самбе или через syncthing - не выйдет, это будет только readonly представление, без опции записи.
 
 ==== snapraid
-https://github.com/amadvance/snapraid
-https://www.snapraid.it/manual
-https://wiki.omv-extras.org/doku.php?id=omv6:omv6_plugins:snapraid
-https://perfectmediaserver.com/02-tech-stack/snapraid/
+- https://github.com/amadvance/snapraid
+- https://www.snapraid.it/manual
+- https://wiki.omv-extras.org/doku.php?id=omv6:omv6_plugins:snapraid
+- https://perfectmediaserver.com/02-tech-stack/snapraid/
 
 Многие думают что это аналог софтового рейда. Но это не так.
 Это аналог бэкап системы.
 
 Более того, сильнее всего вводит в заблуждение эта схема
+
 image::omv6-plugins-snapraid-02.jpg[]
 
 Или вот эта
+
 image::diagram-mergerfs-snapraid.png[]
 
 И комментарий, что "диск четности нужен размера больше и равный самому большому диску данных".
