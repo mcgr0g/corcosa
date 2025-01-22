@@ -1,21 +1,7 @@
 ---
-version: "3.8"
-# name: media-box
+# name: video-box
 # about: https://github.com/mcgr0g/corcosa
 services:
-
-  organizr:
-    container_name: organizr # https://github.com/organizr/docker-organizr
-    image: ghcr.io/organizr/organizr:latest
-    environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
-    volumes:
-      - ./organizr:/config
-    ports:
-      - 888:80
-    restart: unless-stopped
 
   torproxy:
     container_name: torproxy
@@ -41,6 +27,8 @@ services:
       - ${ROOT}/media/torrents/blackhole:/downloads # place where to put .torrent files for manual download
     ports:
       - 9117:9117
+    networks:
+      - jumper2kamartaj
     restart: unless-stopped
 
   jackettflared: # версия сервиса для работы через медленный torproxy, и с flaresolverr
@@ -56,6 +44,8 @@ services:
       - ${ROOT}/media/torrents/blackhole:/downloads # place where to put .torrent files for manual download
     ports:
       - 9118:9117
+    networks:
+      - jumper2kamartaj
     restart: unless-stopped
   
   flaresolverr: # кривая балалайка для обхода cdn. Не умеет в proxy и решать капчи.
@@ -68,6 +58,8 @@ services:
       TZ: ${TZ}
     ports:
       - 8191:8191
+    networks:
+      - jumper2kamartaj
     restart: unless-stopped
 
   qbittorrent: # https://github.com/linuxserver/docker-qbittorrent
@@ -84,12 +76,13 @@ services:
       - 6881:6881 # tcp connection port
       - 8080:8080 # http gui
       - 9001:9001 # tracker port
+    networks:
+      - jumper2kamartaj
     restart: unless-stopped
 
   sonarr: # сериалы
     container_name: sonarr
     image: linuxserver/sonarr:latest
-    network_mode: host
     environment:
       PUID: ${PUID}
       PGID: ${PGID}
@@ -100,12 +93,12 @@ services:
       - ${ROOT}/media:/media # both downloads & media folders folder
     ports:
       - 8989:8989
+    network_mode: host
     restart: unless-stopped
 
   radarr: # кино
     container_name: radarr
     image: linuxserver/radarr:latest
-    network_mode: host
     environment:
       PUID: ${PUID} # default user id, defined in .env
       PGID: ${PGID} # default group id, defined in .env
@@ -116,75 +109,10 @@ services:
       - ${ROOT}/media:/media # both downloads & media folders folder
     ports:
       - 7878:7878
-    restart: unless-stopped
-
-  plex-server: # https://github.com/plexinc/pms-docker
-    container_name: plex
-    image: plexinc/pms-docker:latest # freeze version https://hub.docker.com/r/plexinc/pms-docker/tags/
-    environment:
-      TZ: ${TZ} # timezone, defined in .env
-      PLEX_UID: ${PUID} # default user id, defined in .env
-      PLEX_GID: ${PGID} # default group id, defined in .env
-      HOSTNAME: stone
-      ADVERTISE_IP: http://stone.local:32400, http://192.168.2.10:32400
-      ALLOWED_NETWORKS: 192.168.2.0/24
-    volumes:
-      - ./plex/db:/config # plex database
-      - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования
-      - ${ROOT}/cache/plex/transcode:/transcode # temp transcoded files
-      - ${ROOT}/media:/media # media library
-      # - ${ROOT}/yandex/Music:/music # music library
-    devices:
-    - /dev/dri:/dev/dri # https://github.com/plexinc/pms-docker#intel-quick-sync-hardware-transcoding-support
-    ports:
-      - 32400:32400/tcp
-      - 3005:3005/tcp
-      - 8324:8324/tcp
-      - 32469:32469/tcp
-      - 32410:32410/udp
-      - 32412:32412/udp
-      - 32413:32413/udp
-      - 32414:32414/udp
-    restart: unless-stopped
-
-  metube: # выкачивалка ютуба
-    image: alexta69/metube
-    container_name: metube
-    #vuser: "${PUID}:${PGID}"
-    ports:
-      - 8081:8081
-    volumes:
-      - ${ROOT}/media/ytb:/downloads
-    environment:
-      CUSTOM_DIRS: true
-    restart: unless-stopped
-
-  torrserver: # выкачивает торренты в ram. Можно перенстроить на хранение кеша из ram на hdd, но непонятно ради чего
-    container_name: torrserver # https://github.com/YouROK/TorrServer
-    image: ghcr.io/yourok/torrserver:latest 
-    hostname: torrserver
-    domainname: torrserver.lan
-    # user: "${PUID}:${PGID}"
-    volumes:
-      - './ts:/opt/ts/config'
-      - '${ROOT}/cache/torrserver:/opt/ts/torrents'
-    ports:
-      - 8090:8090 # http streaming
-      - 1900:1900 # dlna discover
-      - 1338:1338 # dlna default streaming port https://github.com/anacrolix/dms/blob/master/README.rst#usage-of-dms
     networks:
-      mcvlan_subnet:
-        ipv4_address: 192.168.2.230
+      - jumper2kamartaj
     restart: unless-stopped
 
-networks: 
-  mcvlan_subnet:
-    name: elder_ip_subnet_type_c
-    driver: macvlan
-    driver_opts:
-      parent: br0 # если вместо физической карты настроен бридж, то нужно указывать именно его
-    ipam:
-      config:
-        - subnet: 192.168.2.0/24
-          gateway: 192.168.2.1
-          ip_range: 192.168.2.224/27
+networks:
+  jumper2kamartaj:
+    external: true

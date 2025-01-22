@@ -1,0 +1,33 @@
+---
+# name: torrserver
+# about: https://github.com/mcgr0g/corcosa
+services:
+  torrserver: # выкачивает торренты в ram. Можно перенстроить на хранение кеша из ram на hdd, но непонятно ради чего
+    container_name: torrserver # https://github.com/YouROK/TorrServer
+    image: ghcr.io/yourok/torrserver:latest 
+    hostname: torrserver
+    domainname: torrserver.lan
+    # user: "${PUID}:${PGID}"
+    volumes:
+      - './ts:/opt/ts/config'
+      - '${ROOT}/cache/torrserver:/opt/ts/torrents'
+    ports:
+      - 8090:8090 # http streaming & webUI
+      - 1900:1900 # dlna discover
+      - 1338:1338 # dlna default streaming port https://github.com/anacrolix/dms/blob/master/README.rst#usage-of-dms
+    networks:
+      mcvlan_subnet:
+        ipv4_address: 192.168.2.230
+    restart: unless-stopped
+
+networks: 
+  mcvlan_subnet:
+    name: elder_ip_subnet_type_c
+    driver: macvlan
+    driver_opts:
+      parent: br0 # если вместо физической карты настроен бридж, то нужно указывать именно его
+    ipam:
+      config:
+        - subnet: 192.168.2.0/24
+          gateway: 192.168.2.1
+          ip_range: 192.168.2.224/27

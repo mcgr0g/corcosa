@@ -1,0 +1,15 @@
+---
+# name: organizr
+services:
+  organizr:
+    container_name: organizr # https://github.com/organizr/docker-organizr
+    image: ghcr.io/organizr/organizr:latest
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    volumes:
+      - ./organizr:/config
+    ports:
+      - 888:80
+    restart: unless-stopped

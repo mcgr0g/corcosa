@@ -1,0 +1,24 @@
+---
+# name: youtube
+# about: https://github.com/mcgr0g/corcosa
+services:
+
+  metube: # выкачивалка ютуба
+    image: alexta69/metube
+    container_name: metube
+    #vuser: "${PUID}:${PGID}"
+    volumes:
+      - ${ROOT}/media/ytb:/downloads
+    environment:
+      CUSTOM_DIRS: true
+      YTDL_OPTIONS: '{"proxy": "socks5://proxyd:20170/"}'
+    ports:
+      - 8081:8081
+    networks:
+      - jumper2kamartaj
+    restart: unless-stopped
+
+networks:
+  jumper2kamartaj:
+    external: true
+

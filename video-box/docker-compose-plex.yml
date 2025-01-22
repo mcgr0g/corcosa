@@ -1,0 +1,33 @@
+---
+# name: plex
+# about: https://github.com/mcgr0g/corcosa
+services:
+  plex-server: # https://github.com/plexinc/pms-docker
+    container_name: plex
+    image: plexinc/pms-docker:latest # freeze version https://hub.docker.com/r/plexinc/pms-docker/tags/
+    environment:
+      TZ: ${TZ} # timezone, defined in .env
+      PLEX_UID: ${PUID} # default user id, defined in .env
+      PLEX_GID: ${PGID} # default group id, defined in .env
+      HOSTNAME: stone
+      ADVERTISE_IP: http://stone.local:32400, http://192.168.2.10:32400
+      ALLOWED_NETWORKS: 192.168.2.0/24
+    volumes:
+      - ./plex/db:/config # plex database
+      - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования
+      - ${ROOT}/cache/plex/transcode:/transcode # temp transcoded files
+      - ${ROOT}/media:/media # media library
+      - ${DONWL2}:/webinars2
+      # - ${ROOT}/yandex/Music:/music # music library
+    devices:
+    - /dev/dri:/dev/dri # https://github.com/plexinc/pms-docker#intel-quick-sync-hardware-transcoding-support
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    restart: unless-stopped
