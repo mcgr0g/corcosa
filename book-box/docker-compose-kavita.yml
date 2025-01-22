@@ -1,0 +1,19 @@
+---
+# name: book-box
+# about: https://github.com/mcgr0g/corcosa
+services:
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    volumes:
+      - ./kavita:/config
+      - ${CLOUD1}/library:/data/library #calibre library
+      - ${ROOT}/media/torrents/book:/data/torrents #just downloaded
+      - ${CLOUD1}/hobby-books:/data/seltsorted #calibre library
+    ports:
+      - 5000:5000
+    restart: unless-stopped

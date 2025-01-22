@@ -1,0 +1,17 @@
+:toc: left
+:toclevels: 4
+== book-box
+
+=== calibre-web
+не стоит внимания, фича по синхронизации чтения так и не имплементирована
+https://github.com/janeczku/calibre-web/issues/1797
+
+=== Kavita
+у калибри есть альтернатива https://github.com/Kareadita/Kavita
+правада позиционируется она как для манги. Но этим можно пренебречь
+
+У них там есть несколько доступных образов для установки
+https://wiki.kavitareader.com/installation/docker
+но сам мейнтейнер не запаривается с https://github.com/Kareadita/Kavita/blob/develop/Dockerfile
+и ожидаются проблемы с правами доступа на хост ОС. Так что стоит присмотреться к https://github.com/linuxserver/docker-kavita
+
