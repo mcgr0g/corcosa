@@ -39,3 +39,5 @@ include::host/diskpool.adoc[]
 include::video-box/video.adoc[]
 
 include::audio-box/audio.adoc[]
+
+include::copier/copier.adoc[]

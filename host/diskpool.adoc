@@ -98,7 +98,7 @@ TIP: так же как и при raid1, объем зеркала слева и
 | серийник | устройство | мета | размер | фичи | назначение | mount
 
 | WD-WCC4N0PY280X
-| /dev/sdf1
+| /dev/sdd
 | snap-data
 | 1,8 tb
 | SMR, write write cache
@@ -106,23 +106,23 @@ TIP: так же как и при raid1, объем зеркала слева и
 | /srv/dev-disk-by-uuid-4198a3de-d9a2-44cf-a24d-439a1f97308e
 
 | WHICBR26
-| /dev/sdd1
+| --
 | snap-par
 | 2,7 tb
 | CMR, write write cache, AMP
-| Диск четности
+| Диск четности, отрыгнул за пол года
 | /srv/dev-disk-by-uuid-3ef81a7a-2ce9-4801-9319-1d16ad1bbacd
 
 | WHICBR1N
-| /dev/sdc1
-| snap-full
+| /dev/sdb
+| snap-par2
 | 2,7 tb
 | CMR, write write cache, AMP
-| Будущий диск данных и контент файла, постоит выключенным
+| Будущий диск данных и контент файла, постоит выключенным, но стал диском четности
 | /srv/dev-disk-by-uuid-faecbfa7-1aa5-4361-a398-881d072a7764
 
 | WHICBR2P
-| /dev/sdb1
+| --
 | snap-full
 | 2,7 tb
 | CMR, write write cache, AMP
@@ -131,7 +131,7 @@ TIP: так же как и при raid1, объем зеркала слева и
 
 
 | WD-WX42DC0CEH8E
-| /dev/sdc
+| /dev/sdс
 | nixmedia
 | 3.64
 | SMR, write write cache
