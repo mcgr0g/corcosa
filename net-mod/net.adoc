@@ -1,0 +1,74 @@
+:toc: left
+== net-mod
+
+=== xray
+Начал присматривать замену torproxy и требовался какой-нибудь клиент, что бы контейнерам указывать обычную проксю. 
+
+Для начала нужно проверить какой у нас сейчас ip через `curl http://httpbin.org/get`, должно вывоподиться что то вроде
+
+[source,json]
+----
+{
+  "args": {},
+  "headers": {
+    "Accept": "*/*",
+    "Host": "httpbin.org",
+    "User-Agent": "curl/8.10.1",
+    "X-Amzn-Trace-Id": "Root=1-67733b03-71a0ab3b2102d1c06d23009a"
+  },
+  "origin": "46.138.21.92",
+  "url": "http://httpbin.org/get"
+}
+----
+
+
+Потом ваш url подключения нужно распарсить и привести в json виду с помощью проектов 
+
+- https://github.com/ImanSeyed/v2ray-uri2json
+- https://github.com/Am-Delta/v2ray-to-json
+
+Мержить нужно будет глазками, есть незначительные отличия.
+
+Теперь про проекты.
+
+Есть странный косой докер образ https://github.com/samuelhbne/proxy-xray?tab=readme-ov-file
+В принципе он поддерживает все что нужно, но нужно руками задавать все параметры подключения в компоуз. Это можно, но не удобно.
+
+А есть https://github.com/v2rayA/v2rayA , который встрает даже на роутеры https://habr.com/ru/articles/773696/.
+Но мы то будем использовать https://v2raya.org/en/docs/prologue/installation/docker/
+
+Берем `docker-compose -f docker-compose-vless.yaml up` и пользуемся.
+Если что то переделали под себя то `docker-compose -f docker-compose-vless.yaml up --build`
+
+В консоли будет приглашение открыть веб интерфейс, не стеняемся и задаем логин и пароль.
+
+Теперь надо пробежаться по разделам конфигурации.
+
+Transparent Proxy/System Proxy → 
+On: Traffic Splitting Mode is the Same as the Rule Port 
+
+IP Forwarding = true
+Port Shating = true
+
+Traffic Splitting Mode of Rule Port → 
+RoutingA → 
+copy config
+[source,text]
+----
+default: proxy
+# write your own rules below
+ip(geoip:refilter)->proxy
+domain(ext:"geosite.dat:refilter")->proxy
+----
+
+Prevent DNS Spoofing → 
+Advanced Setting →
+copy config
+[source,text]
+----
+https://dns.alidns.com/dns-query -> direct
+tcp://dns.opendns.com:5353 -> proxy
+119.29.29.29 -> direct
+----
+
+По завершению настройки нужно вызывать `curl -sx 127.0.0.1:20170 http://httpbin.org/get` и ip адрет будет уже другой. Если нужен галимый http прокси, то там будет дефолтный порт рядом 20171
