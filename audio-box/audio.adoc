@@ -19,7 +19,10 @@
 ===== OwnTone
 Но если не нужны фичи раздельных зон, то можно резануть косты и воспользоваться только одним прикладом без мозгодробящих настроек.
 
-Можно сделать в локалке сетевой плейлист через тот же icecast или даже через https://owntone.github.io/owntone-server/outputs/streaming/ попробовать подключиться к http://192.168.2.10:3689/stream.mp3. Он есть в `OnwTone.m3u`
+Подключаться по http://192.168.2.231:3689 
+Отселить его на отдельный mcvlan адрес сразу стоит, что бы потом не было конфликтов с mpd портом 6600 и чем либо еще.
+
+Можно сделать в локалке сетевой плейлист через тот же icecast или даже через https://owntone.github.io/owntone-server/outputs/streaming/ попробовать подключиться к http://192.168.2.321:3689/stream.mp3. Он есть в `OnwTone.m3u`
 Но это на любителя, логичнее поставить AirReceiver и явно управлять из приложения.
 См для андроид боксов https://4pda.to/forum/index.php?showtopic=1051809&view=findpost&p=126566916
 
@@ -30,10 +33,13 @@
 Честный мультирум с зонами, сложный и забористый.
 Стоит начать ознакомление с https://habr.com/ru/articles/510544/
 и https://github.com/StalkerSVR/snapcast-multiroom
+и https://github.com/nolte/docker_compose-audiostation
 Там местами хардкод в конфигах, стоит ознакомиться с оригинальным https://github.com/badaix/snapcast#setup-of-audio-playersserver
 и с чужими пресетами из
+
 - https://github.com/nolte/docker-snapcast
 - https://github.com/sweisgerber/docker-snapcast
+- https://github.com/jaedb/snapserver
 
 НО у всего проекта есть одно ограничение, они не работают с tv-box на андроиде, только с RPi и его клонами, так как им нужно очень много из полноценного linux стека. 
 Но это обходится с помощью AirReceiver.

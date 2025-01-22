@@ -1,5 +1,4 @@
 ---
-version: "3.8"
 # name: audio-box
 # about: https://github.com/mcgr0g/corcosa
 services:
@@ -13,20 +12,14 @@ services:
       TZ: ${TZ}
     volumes:
       - ./owntone:/config
-      - ${MUSIC}:/music
-    network_mode: host
+      - ${CLOUD1}/Music:/music
+      - ${TORRENTS}/music:/torrents
+    networks:
+      mcvlan_subnet:
+        ipv4_address: 192.168.2.231
     restart: unless-stopped
-  
-  mstream:
-    image: lscr.io/linuxserver/mstream:latest
-    container_name: mstream
-    environment:
-      PUID: ${PUID2}
-      PGID: ${PGID2}
-      TZ: ${TZ}
-    volumes:
-      - ./mstream:/config
-      - ${MUSIC}:/music
-    ports:
-      - 3000:3000
-    restart: unless-stopped
+
+networks: 
+  mcvlan_subnet:
+    external: true 
+    name: elder_ip_subnet_type_c
