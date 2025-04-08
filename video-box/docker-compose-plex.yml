@@ -10,8 +10,8 @@ services:
       PLEX_UID: ${PUID} # default user id, defined in .env
       PLEX_GID: ${PGID} # default group id, defined in .env
       HOSTNAME: stone
-      ADVERTISE_IP: http://stone.local:32400, http://192.168.2.10:32400
-      ALLOWED_NETWORKS: 192.168.2.0/24
+      ADVERTISE_IP: http://stone.local:32400, http://${IP_MAIN}:32400
+      ALLOWED_NETWORKS: ${SUBNET_IP}/${SUBNETM_FULL}
     volumes:
       - ./plex/db:/config # plex database
       - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования

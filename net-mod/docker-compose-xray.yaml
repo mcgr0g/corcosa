@@ -3,24 +3,16 @@
 services:
 
     xray:
-      image:  mcgr0g/v2raya
       build:
         context: .
         # dockerfile: v2raya.Dockerfile
         dockerfile_inline: |
-          ARG BUILD_DATE=$(date +%Y-%m-%d)
           FROM mzz2017/v2raya:latest
-          LABEL org.opencontainers.image.authors="Ronnie McGrog" \
-            org.opencontainers.image.title="v2raya-custgeo" \
-            org.opencontainers.image.description="v2raya with custom geo databases" \
-            org.opencontainers.image.created="${BUILD_DATE}"
           RUN \
             wget -O /usr/local/share/v2ray/geosite.dat \
             https://github.com/1andrevich/Re-filter-lists/releases/latest/download/geosite.dat && \
             wget -O /usr/local/share/v2ray/geoip.dat \
             https://github.com/1andrevich/Re-filter-lists/releases/latest/download/geoip.dat
-          EXPOSE 2017 20170 20171 20172
-          VOLUME /etc/v2raya
           ENTRYPOINT ["v2raya"]
       container_name: proxyd
       volumes:
