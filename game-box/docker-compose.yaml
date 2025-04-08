@@ -1,0 +1,84 @@
+---
+# name: game-box
+# about: https://github.com/mcgr0g/corcosa
+services:
+
+  #https://github.com/filebrowser/filebrowser
+  minebrowser:
+    build:
+        context: .
+        dockerfile_inline: |
+          FROM filebrowser/filebrowser:s6
+          RUN apk add --no-cache zip
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+    volumes:
+      - ./minebrowser/db:/database
+      - ./minebrowser/cfg:/config
+      - ./bds:/srv
+    ports:
+      - 9090:80
+    restart: unless-stopped
+
+  minecraft-base:
+    image: itzg/minecraft-bedrock-server # https://github.com/itzg/docker-minecraft-bedrock-server
+    environment:
+      UID: ${PUID}
+      GID: ${PGID}
+      TZ: ${TZ}
+      EULA: true
+      VERSION: ${SEVER_VER}
+      MAX_THREADS: 0
+      ONLINE_MODE: false
+      WHITE_LIST: false
+      OPS: ${ADMIN_UID}
+      ALLOW_CHEATS: true
+    volumes:
+    - ./bds/base/config:/config
+    - ./bds/base/data:/data
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+  bds-spider-hides:
+    extends:
+      service: minecraft-base
+    environment:
+      SERVER_NAME: ${MAP_SPIDER_HIDES}
+      DIFFICULTY: easy
+      GAMEMODE: adventure
+      LEVEL_NAME: ${MAP_SPIDER_HIDES}
+    volumes:
+      - ./bds/${MAP_SPIDER_HIDES}/config:/config
+      - ./bds/${MAP_SPIDER_HIDES}/data:/data
+    ports:
+      - 19133:19132/udp
+
+  bds-medieval-snow-plain:
+    extends:
+      service: minecraft-base
+    environment:
+      SERVER_NAME: "Средневековый город на снежной равнине"
+      DIFFICULTY: easy
+      GAMEMODE: survival
+      LEVEL_NAME: ${MAP_02}
+    volumes:
+      - ./bds/${MAP_02}/config:/config
+      - ./bds/${MAP_02}/data:/data
+    ports:
+      - 19135:19132/udp
+
+  bds-chamomile-valley:
+    extends:
+      service: minecraft-base
+    environment:
+      SERVER_NAME: "Ромашковая долина"
+      DIFFICULTY: easy
+      GAMEMODE: survival
+      LEVEL_NAME: ${MAP_03}
+    volumes:
+      - ./bds/${MAP_03}/config:/config
+      - ./bds/${MAP_03}/data:/data
+    ports:
+      - 19136:19132/udp
