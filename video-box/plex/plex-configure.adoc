@@ -15,17 +15,84 @@
 Без этого конфига щmbi, overseerr да и остальные смогут авторизоваться на wan сервере, но не сможет получить параметры lan подключения. А вещание через wan ретрансляторы - такая себе идея: будет понижение качества до 480p.
 
 ==== Авторизация
-Придется немного пошелудить руками.
-Зайдите на https://plex.tv/devices.xml и изучите исходник страницы. Нужный вам элемент вы без труда найдете глазами
+Теперь можно просто зайти на https://www.plex.tv/claim и подставить значение в PLEX_CLAIM.
+
+А раньше нужно было немного пошелудить руками: 
+- идти на https://plex.tv/devices.xml и изучите исходник страницы. 
+- искать там устройство вида 
 `<Device name="Ombi" product="Ombi" productVersion="3" platform="Web" platformVersion="" device="Ombi" ...`
-Берите тэги token и id подставляйте их в `plex authorization token` и в `machine identifier`.
-Порт - классический 32400.
+- выковыривать тэги token и id подставляйте их куда то `plex authorization token` и в `machine identifier`.
+
+Но это в прошлом.
+
+Порт webui - 32400, он там для чего то еще используется.
 
 Между делом, в инфраструктуре плекса могут падать и wan сервера. И если это не предусмотреть, то на lan сервере в такие моменты не выйдет https://www.reddit.com/r/PleX/comments/we0xtd/comment/iilnizm/?utm_source=share&utm_medium=web2x&context=3[даже авторизоваться].
 По этому в `ALLOWED_NETWORKS` следует добавить зафиксировнный на роутере ip ноута и "взрослого телевизора".
 
 ==== Транскодирование
 ТВ приставки нынче заряженные и умеют играть DD+ звук, но Плекс может спотыкаться об дороги ac3 и eac3: или запускать принудительное транскодирование или тупо молчать.
+
+Для транскодирования надо будет поставить дровишки и указать устройство. Так как проц у меня невероятно старый то ему нужны пак старых драйверов
+
+sudo apt install i965-va-driver intel-media-va-driver-non-free vainfo
+export LIBVA_DRIVER_NAME=i965  # Для старых Intel (4-5 gen)
+и теперь команда vainfo должна выдавать
+```
+enot@stone:~$ vainfo
+error: can't connect to X server!
+libva info: VA-API version 1.10.0
+libva info: User environment variable requested driver 'i965'
+libva info: Trying to open /usr/lib/x86_64-linux-gnu/dri/i965_drv_video.so
+libva info: Found init function __vaDriverInit_1_8
+libva info: va_openDriver() returns 0
+vainfo: VA-API version: 1.10 (libva 2.10.0)
+vainfo: Driver version: Intel i965 driver for Intel(R) Haswell - 2.4.1
+vainfo: Supported profile and entrypoints
+      VAProfileMPEG2Simple            :	VAEntrypointVLD
+      VAProfileMPEG2Simple            :	VAEntrypointEncSlice
+      VAProfileMPEG2Main              :	VAEntrypointVLD
+      VAProfileMPEG2Main              :	VAEntrypointEncSlice
+      VAProfileH264ConstrainedBaseline:	VAEntrypointVLD
+      VAProfileH264ConstrainedBaseline:	VAEntrypointEncSlice
+      VAProfileH264Main               :	VAEntrypointVLD
+      VAProfileH264Main               :	VAEntrypointEncSlice
+      VAProfileH264High               :	VAEntrypointVLD
+      VAProfileH264High               :	VAEntrypointEncSlice
+      VAProfileH264MultiviewHigh      :	VAEntrypointVLD
+      VAProfileH264MultiviewHigh      :	VAEntrypointEncSlice
+      VAProfileH264StereoHigh         :	VAEntrypointVLD
+      VAProfileH264StereoHigh         :	VAEntrypointEncSlice
+      VAProfileVC1Simple              :	VAEntrypointVLD
+      VAProfileVC1Main                :	VAEntrypointVLD
+      VAProfileVC1Advanced            :	VAEntrypointVLD
+      VAProfileNone                   :	VAEntrypointVideoProc
+      VAProfileJPEGBaseline           :	VAEntrypointVLD
+```
+
+Если все норм посмотим на устройства в системе `ls /dev/dri/`
+Должно быть: `card0 renderD128`.
+Так как docker будет запускаться от не привелигерованного пользователя bender, то ему нужно будет выдать права на вхождение в группы video и render.
+Стоит делать это в интерфейса OMV.
+
+А потом надо выдать права на устройство
+ls -la /dev/dri/renderD128
+
+> crw-rw---- 1 root video 226, 128 Feb  2 03:10 /dev/dri/renderD128
+
+если отображение не такое, то можно
+```
+sudo chmod 660 /dev/dri/renderD128
+sudo chown :video /dev/dri/renderD128
+```
+
+И при пробросе устройства в докер компоузе стоит попробовать передавать переменную окружения. На случай если в контейнере используется та самая vainfo
+```yaml
+environment:
+  - LIBVA_DRIVER_NAME=i965
+```
+
+
 На тему проброса ac3 звука народ давно https://forums.plex.tv/t/movies-with-eac3-5-1-codec-dosnt-play/513263/17[костылит]. 
 Но у меня не завелось. Мануал по https://www.plexopedia.com/plex-media-server/general/client-profiles/[клиентским профилям] помог сделать такой профиль
 

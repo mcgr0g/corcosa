@@ -1,5 +1,5 @@
 ---
-# name: game-box
+# name: minecraft bedrock servers
 # about: https://github.com/mcgr0g/corcosa
 services:
 
@@ -41,20 +41,6 @@ services:
     stdin_open: true
     tty: true
 
-  bds-spider-hides:
-    extends:
-      service: minecraft-base
-    environment:
-      SERVER_NAME: ${MAP_SPIDER_HIDES}
-      DIFFICULTY: easy
-      GAMEMODE: adventure
-      LEVEL_NAME: ${MAP_SPIDER_HIDES}
-    volumes:
-      - ./bds/${MAP_SPIDER_HIDES}/config:/config
-      - ./bds/${MAP_SPIDER_HIDES}/data:/data
-    ports:
-      - 19133:19132/udp
-
   bds-medieval-snow-plain:
     extends:
       service: minecraft-base
@@ -67,6 +53,7 @@ services:
       - ./bds/${MAP_02}/config:/config
       - ./bds/${MAP_02}/data:/data
     ports:
+      # - 19132:19132/udp
       - 19135:19132/udp
 
   bds-chamomile-valley:

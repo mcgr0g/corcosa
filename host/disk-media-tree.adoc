@@ -1,0 +1,90 @@
+==== disk tree
+
+структура каталогов `tree -dL 4` 
+будет выглядеть так
+[source,shell]
+----
+.
+├── appdata
+│  ├── book-box
+│  │  └── kavita
+│  ├── copier
+│  │  ├── cups
+│  │  ├── cupsd
+│  │  └── scanservjs
+│  ├── host-tools
+│  ├── jellyfin
+│  │  └── jellyfin
+│  ├── kid-dlna
+│  │  └── kdlna
+│  ├── organizr
+│  │  └── organizr
+│  ├── owntone
+│  │  └── owntone
+│  ├── plex
+│  │  └── plex
+│  ├── portainer
+│  ├── torrserver
+│  │  └── ts
+│  ├── video-box
+│  │  ├── jackettflared
+│  │  ├── jackettproxy
+│  │  ├── qbittorrent
+│  │  ├── radarr
+│  │  └── sonarr
+│  ├── xray-client
+│  │  └── v2raya
+│  └── youtube
+├── barn
+│  └── scan
+├── data
+│  ├── cache
+│  │  ├── plex
+│  │  └── torrserver
+│  ├── configs
+│  │  └── organizr
+│  ├── media
+│  │  ├── ready
+│  │  │  ├── movies
+│  │  │  │  ├── A Minecraft Movie (2025)
+│  │  │  │  └── Spider-Man (2002)
+│  │  │  └── tv
+│  │  │      └── The Witcher
+│  │  ├── torrents
+│  │  │  ├── abook
+│  │  │  │  ├── Клайв Стейплз Льюис - Хроники Нарнии.2012.Андрей Антипов
+│  │  │  │  └── Роулинг Джоан Кэтлин - Гарри Поттер [Александр Клюквин]
+│  │  │  ├── blackhole
+│  │  │  ├── downloads
+│  │  │  ├── games
+│  │  │  │  ├── Assassin's Creed Brotherhood
+│  │  │  │  ├── Hitman Absolution_Professional Edition_[RG Games]=Rutracker
+│  │  │  │  ├── The Sims 4
+│  │  │  │  ├── The.Thaumaturge-RUNE
+│  │  │  │  ├── [dixen18] Cyberpunk 2077
+│  │  │  │  └── tails_noir_artifact_edition
+│  │  │  ├── history
+│  │  │  ├── incomplete
+│  │  │  ├── kid
+│  │  │  │  ├── audio
+│  │  │  │  ├── movie
+│  │  │  │  └── tv
+│  │  │  ├── movies
+│  │  │  │  ├── История игрушек
+│  │  │  │  └── Три богатыря
+│  │  │  ├── music
+│  │  │  │  ├── Joe Bonamassa - Discography
+│  │  │  │  └── Various Artists - Cyberpunk 2077 - Original Score (2020) [CD FLAC]
+│  │  │  ├── serial
+│  │  │  │  └── Man Vs Bee S01 WEB-DL 1080p
+│  │  │  ├── show
+│  │  │  │  └── music
+│  │  │  └── webinar
+│  │  │      ├── Spring
+│  │  │      └── unsorted
+│  │  └── ytb
+│  │      └── Alex and Steve Life (Minecraft Animation Series)
+│  └── yandex
+│      └── Music
+└── lost+found
+----

@@ -1,0 +1,37 @@
+# about: https://github.com/mcgr0g/corcosa
+services:
+  jellyfin:
+    # image: lscr.io/linuxserver/jellyfin:latest # https://github.com/linuxserver/docker-jellyfin
+    image: jellyfin/jellyfin:latest # oficial image https://github.com/jellyfin/jellyfin-packaging
+    user: ${PUID}:${PGID} # only for oficial image https://jellyfin.org/docs/general/installation/container#using-docker-compose
+    environment:
+      TZ: ${TZ} # timezone, defined in .env
+      PUID: ${PUID} # default user id, defined in .env
+      PGID: ${PGID} # default group id, defined in .env
+      JELLYFIN_PublishedServerUrl: http://${IP_JFIN}
+      LIBVA_DRIVER_NAME: i965
+      # http_proxy: proxyd:20170/
+      http_proxy: http://192.168.2.10:20171
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - ${ROOT}/media:/media # media library
+      - ${DONWL2}:/webinars2
+      - ${CLOUD1}/Music:/music-lcl # music library
+      - ${CLIPS}:/clips # сохраненки из ютуба
+    devices:
+    - /dev/dri:/dev/dri # https://docs.linuxserver.io/images/docker-jellyfin/#intelatiamd
+    ports:
+      - 8096:8096 # webui
+      - 8920:8920 # Https webUI
+      - 7359:7359/udp # Allows clients to discover Jellyfin on the local network
+      # - 1900:1900/udp # Service discovery used by DNLA and clients
+    networks:
+      elder_ip_subnet_type_c:
+        ipv4_address: ${IP_JFIN}
+        mac_address: ${MAC_JFIN}
+    restart: unless-stopped
+
+networks:
+  elder_ip_subnet_type_c:
+    external: true

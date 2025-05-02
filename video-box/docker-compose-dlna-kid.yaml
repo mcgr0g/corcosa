@@ -1,0 +1,31 @@
+# name: dlna-kid
+# about: https://github.com/mcgr0g/corcosa
+services:
+  kid-dlna: # https://github.com/GioF71/minidlna-docker
+    image: giof71/minidlna:latest
+    hostname: kid-dlna
+    environment:
+      TZ: ${TZ} # timezone, defined in .env
+      PUID: ${PUID}
+      PGID: ${PGID}
+      MINIDLNA_FRIENDLY_NAME: kid
+      MINIDLNA_DIR_A_1: /media/audio
+      MINIDLNA_DIR_V_1: /media/movie
+      MINIDLNA_DIR_V_2: /media/tv
+      MINIDLNA_DIR_V_3: /clips
+      MINIDLNA_DIR_V_4: /ytb
+    volumes:
+      - ./kdlna/db:/db
+      - ./kdlna/log:/log
+      - ${TORRENTS}/kid:/media # media library
+      - ${CLIPS}/kid:/clips # любимые сохраненки из ютуба
+      - ${ROOT}/media/ytb:/ytb # конревой каталог metube
+    networks:
+      elder_ip_subnet_type_c:
+        ipv4_address: ${IP_KDLNA}
+        mac_address: ${MAC_KDLNA}
+    restart: unless-stopped
+
+networks:
+  elder_ip_subnet_type_c:
+    external: true

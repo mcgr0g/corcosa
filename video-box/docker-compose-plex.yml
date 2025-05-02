@@ -1,28 +1,32 @@
----
 # name: plex
 # about: https://github.com/mcgr0g/corcosa
 services:
   plex-server: # https://github.com/plexinc/pms-docker
-    container_name: plex
-    image: plexinc/pms-docker:latest # freeze version https://hub.docker.com/r/plexinc/pms-docker/tags/
+    image: lscr.io/linuxserver/plex:latest # freeze version https://hub.docker.com/r/plexinc/pms-docker/tags/
+    hostname: stone
     environment:
       TZ: ${TZ} # timezone, defined in .env
       PLEX_UID: ${PUID} # default user id, defined in .env
+      PUID: ${PUID}
       PLEX_GID: ${PGID} # default group id, defined in .env
+      PGID: ${PGID}
       HOSTNAME: stone
-      ADVERTISE_IP: http://stone.local:32400, http://${IP_MAIN}:32400
+      PLEX_CLAIM: claim-bdA_spLWN1Un4_hMnPD5
+      ADVERTISE_IP: http://${IP_PLEX}:32400
       ALLOWED_NETWORKS: ${SUBNET_IP}/${SUBNETM_FULL}
+      VERSION: docker
     volumes:
       - ./plex/db:/config # plex database
       - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования
       - ${ROOT}/cache/plex/transcode:/transcode # temp transcoded files
       - ${ROOT}/media:/media # media library
       - ${DONWL2}:/webinars2
-      # - ${ROOT}/yandex/Music:/music # music library
+      - ${CLOUD1}/Music:/music-lcl # music library
+      - ${CLIPS}:/clips # сохраненки из ютуба
     devices:
-    - /dev/dri:/dev/dri # https://github.com/plexinc/pms-docker#intel-quick-sync-hardware-transcoding-support
+      - /dev/dri:/dev/dri # https://github.com/plexinc/pms-docker#intel-quick-sync-hardware-transcoding-support
     ports:
-      - 32400:32400/tcp
+      - 32400:32400/tcp # main
       - 3005:3005/tcp
       - 8324:8324/tcp
       - 32469:32469/tcp
@@ -30,4 +34,12 @@ services:
       - 32412:32412/udp
       - 32413:32413/udp
       - 32414:32414/udp
+    networks:
+      elder_ip_subnet_type_c:
+        ipv4_address: ${IP_PLEX}
+        mac_address: ${MAC_PLEX}
     restart: unless-stopped
+
+networks:
+  elder_ip_subnet_type_c:
+    external: true

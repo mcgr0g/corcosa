@@ -80,62 +80,7 @@ mkdir movies tv
 cd ../ready
 mkdir movies tv yt-dlp
 ```
-
-в итоге структура каталогов будет выглядеть так:
-```
-tree -dL 4
-
-.
-├── appdata
-│   ├── copier
-│   │   └── cups
-│   ├── media-box
-│   │   ├── jackettflared
-│   │   ├── jackettproxy
-│   │   ├── organizr
-│   │   ├── plex
-│   │   ├── qbittorrent
-│   │   ├── radarr
-│   │   ├── sonarr
-│   │   └── torrserver
-│   └── portainer
-├── barn
-│   ├── devbooks
-│   ├── distrib
-│   │   └── ide
-│   └── knop
-├── data
-│   ├── cache
-│   └── media
-│       ├── ready
-│       │   ├── movies
-│       │   └── tv
-│       ├── torrents
-│       │   ├── abook
-│       │   ├── blackhole
-│       │   ├── book
-│       │   ├── downloads
-│       │   ├── history
-│       │   ├── kid
-│       │   ├── movies
-│       │   ├── music
-│       │   ├── serial
-│       │   ├── soft
-│       │   └── webinar
-│       └── ytb
-│           ├── blues
-│           ├── music shows
-│           └── webinar
-├── lost+found [error opening dir]
-├── www-data
-│   └── dummy
-│       └── html
-└── yandex
-    ├── Music
-    ├── blackhole
-    └── project
-        └── corcosa
-```
+include::disk-media-tree.adoc[]
 
 ==== livehacks
 Ходить по таким дискам достаточно долго и нудно, даже с автокомплитом.
