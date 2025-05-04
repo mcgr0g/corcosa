@@ -1,0 +1,17 @@
+#EXTM3U
+#PLAYLIST:Rock and road streams
+
+#EXTINF:-1, - Maximum Main
+https://maximum.hostingradio.ru/maximum96.aacp?a357
+
+#EXTINF:-1, - Наше радио
+http://nashe1.hostingradio.ru/nashe-128.mp3
+
+#EXTINF:-1, - Наше радио 2
+http://nashe1.hostingradio.ru/nashe20-128.mp3
+
+#EXTINF:-1, - Дорожное радио
+http://dorognoe.hostingradio.ru:8000/dorognoe
+
+#EXTINF:-1, - Русское радио
+https://rusradio.hostingradio.ru/rusradio128.mp3
