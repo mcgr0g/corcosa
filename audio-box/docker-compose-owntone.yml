@@ -3,24 +3,25 @@
 # about: https://github.com/mcgr0g/corcosa
 services:
 
-  owntone: # https://owntone.github.io/owntone-server/outputs/streaming/
+  owntone: # https://github.com/owntone/owntone-container
     container_name: owntone
-    image: lscr.io/linuxserver/daapd:latest
+    image: docker.io/owntone/owntone:latest
     environment:
-      PUID: ${PUID} # но возможно нужно поставить владелец яндекс папки 1000
-      PGID: ${PGID} # но возможно нужно поставить владелец яндекс папки 100
+      UID: ${PUID}
+      GID: ${PGID}
       TZ: ${TZ}
     volumes:
-      - ./owntone:/config
-      - ${CLOUD1}/Music:/music
-      - ${TORRENTS}/music:/torrents
+      - ./owntone/configs:/etc/owntone # configs
+      - ./owntone/cache:/var/cache/owntone # cache
+      - ${CLOUD1}/Music:/srv/media/local
+      - ${TORRENTS}/music:/srv/media/torrents
+      - ${TORRENTS}/kid/audio:/srv/media/Audiobooks
     networks:
-      mcvlan_subnet:
+      elder_ip_subnet_type_c:
         ipv4_address: ${IP_ONWTON}
         mac_address: ${MAC_OWMTONE}
     restart: unless-stopped
 
-networks: 
-  mcvlan_subnet:
-    external: true 
-    name: elder_ip_subnet_type_c
+networks:
+  elder_ip_subnet_type_c:
+    external: true
