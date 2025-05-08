@@ -1,0 +1,26 @@
+---
+# name: audio-box
+# about: https://github.com/mcgr0g/corcosa
+# owntone kid audio books
+services:
+
+  owntone: # https://github.com/owntone/owntone-container
+    container_name: kabook
+    image: docker.io/owntone/owntone:latest
+    environment:
+      UID: ${PUID}
+      GID: ${PGID}
+      TZ: ${TZ}
+    volumes:
+      - ./owntone/configs:/etc/owntone # configs
+      - ./owntone/cache:/var/cache/owntone # cache
+      - ${TORRENTS}/kid/audio:/srv/media/Audiobooks
+    networks:
+      elder_ip_subnet_type_c:
+        ipv4_address: ${IP_KABOOK}
+        mac_address: ${MAC_KABOOK}
+    restart: unless-stopped
+
+networks:
+  elder_ip_subnet_type_c:
+    external: true
