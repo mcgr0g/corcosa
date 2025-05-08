@@ -3,6 +3,7 @@
 services:
   plex-server: # https://github.com/plexinc/pms-docker
     image: lscr.io/linuxserver/plex:latest # freeze version https://hub.docker.com/r/plexinc/pms-docker/tags/
+    container_name: plex
     hostname: stone
     environment:
       TZ: ${TZ} # timezone, defined in .env
@@ -15,6 +16,7 @@ services:
       ADVERTISE_IP: http://${IP_PLEX}:32400
       ALLOWED_NETWORKS: ${SUBNET_IP}/${SUBNETM_FULL}
       VERSION: docker
+      http_proxy: http://192.168.2.235:20171
     volumes:
       - ./plex/db:/config # plex database
       - ./plex/profiles:/usr/lib/plexmediaserver/Resources/Profiles # для подхачивания транскодирования

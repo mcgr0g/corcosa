@@ -10,8 +10,8 @@ services:
       PGID: ${PGID} # default group id, defined in .env
       JELLYFIN_PublishedServerUrl: http://${IP_JFIN}
       LIBVA_DRIVER_NAME: i965
-      # http_proxy: proxyd:20170/
-      http_proxy: http://192.168.2.10:20171
+      LIBVA_DRIVERS_PATH: /usr/lib/x86_64-linux-gnu/dri7
+      http_proxy: http://192.168.2.235:20171
     volumes:
       - ./jellyfin/config:/config
       - ./jellyfin/cache:/cache
