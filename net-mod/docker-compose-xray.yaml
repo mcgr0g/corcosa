@@ -1,7 +1,6 @@
 ---
 # name: xray-client
 services:
-
     xray:
       build:
         context: .
@@ -18,16 +17,21 @@ services:
       volumes:
       - /lib/modules:/lib/modules:ro
       - ./v2raya:/etc/v2raya
-      networks:
-        - jumper2kamartaj
       ports:
         - 2017:2017 # web configuration
         - 20170-20172:20170-20172 # inbound and ounboud ports
       environment:
         V2RAYA_NFTABLES_SUPPORT: on
       privileged: true
+      networks:
+        jumper2kamartaj:
+        elder_ip_subnet_type_c:
+          ipv4_address: ${IP_XRAY}
+          mac_address: ${MAC_XRAY}
       restart: unless-stopped
 
 networks:
   jumper2kamartaj:
+    external: true
+  elder_ip_subnet_type_c:
     external: true
