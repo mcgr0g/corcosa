@@ -1,0 +1,4 @@
+allow-lan: false
+
+authentication:
+  - anotheruser:anothersuerpassword
