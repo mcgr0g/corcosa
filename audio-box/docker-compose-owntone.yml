@@ -18,8 +18,17 @@ services:
       - ${TORRENTS}/kid/audio:/srv/media/Audiobooks
     networks:
       elder_ip_subnet_type_c:
-        ipv4_address: ${IP_ONWTON}
-        mac_address: ${MAC_OWMTONE}
+        ipv4_address: ${ONWTON_IP}
+        mac_address: ${ONWTON_MAC}
+      traefik_network:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_network"
+      - "traefik.http.routers.dadtone.rule=Host(`dadtone.stone.lan`)"
+      - "traefik.http.routers.dadtone.entrypoints=websecure"
+      - "traefik.http.routers.dadtone.tls=true"
+      - "traefik.http.services.dadtone.loadbalancer.server.port=3689"
+      - "traefik.http.routers.dadtone.middlewares=auth-sso@file" # подключать только когда готова sso служба
     restart: unless-stopped
 
 networks:

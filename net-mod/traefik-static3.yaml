@@ -1,0 +1,25 @@
+log:
+  level: DEBUG
+
+entryPoints:
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      # диапазон вашей домашней локалки и докер-сети, чтобы Traefik доверял заголовкам
+      trustedIPs:
+        - "127.0.0.1/32"
+        - "192.168.2.0/24" 
+        - "172.16.0.0/12" # Стандартные внутренние сети Docker
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik_network 
+  file:
+    filename: /etc/traefik/dynamic.yaml
+    watch: true
+
+api:
+  dashboard: true
+  insecure: true # Дашборд будет доступен на порту 8008

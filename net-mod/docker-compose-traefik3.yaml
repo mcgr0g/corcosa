@@ -1,0 +1,32 @@
+services:
+  traefik:
+    # https://github.com/traefik/traefik-library-image
+    # https://traefik.stone.lan
+    image: traefik:v3.6.4 
+    container_name: traefik
+    ports:
+      - 443:443
+      - 8008:8008
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /appdata/traefik/traefik-static3.yaml:/etc/traefik/traefik.yml:ro
+      - /appdata/traefik/traefik-dynamic3.yaml:/etc/traefik/dynamic.yaml:ro
+      - ${CERTS}:/certs:ro
+    networks:
+      jumper2kamartaj:
+      traefik_network:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_network" 
+      # Доступ к самому дашборду по домену
+      - "traefik.http.routers.traefik-dash.rule=Host(`traefik.stone.lan`)"
+      - "traefik.http.routers.traefik-dash.service=api@internal"
+      - "traefik.http.routers.traefik-dash.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dash.tls=true"
+    restart: unless-stopped
+
+networks:
+  jumper2kamartaj:
+    external: true
+  traefik_network:
+    external: true

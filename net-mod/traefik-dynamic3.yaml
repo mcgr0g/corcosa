@@ -1,0 +1,8 @@
+tls:
+  certificates:
+    - certFile: /certs/web-fullchain.pem
+      keyFile: /certs/web-privkey.pem
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: true
