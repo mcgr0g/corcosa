@@ -28,8 +28,8 @@ services:
       # - 1900:1900/udp # Service discovery used by DNLA and clients
     networks:
       elder_ip_subnet_type_c:
-        ipv4_address: ${IP_JFIN}
-        mac_address: ${MAC_JFIN}
+        ipv4_address: ${JFIN_IP}
+        mac_address: ${JFIN_MAC}
     restart: unless-stopped
 
 networks:

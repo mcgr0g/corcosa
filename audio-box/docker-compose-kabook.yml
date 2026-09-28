@@ -17,8 +17,8 @@ services:
       - ${TORRENTS}/kid/audio:/srv/media/Audiobooks
     networks:
       elder_ip_subnet_type_c:
-        ipv4_address: ${IP_KABOOK}
-        mac_address: ${MAC_KABOOK}
+        ipv4_address: ${KABOOK_IP}
+        mac_address: ${KABOOK_MAC}
     restart: unless-stopped
 
 networks:

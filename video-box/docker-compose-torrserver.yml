@@ -17,8 +17,8 @@ services:
       - 1338:1338 # dlna default streaming port https://github.com/anacrolix/dms/blob/master/README.rst#usage-of-dms
     networks:
       mcvlan_subnet:
-        ipv4_address: ${IP_TRRSRV}
-        mac_address: ${MAC_TRRSRV}
+        ipv4_address: ${TRRSRV_IP}
+        mac_address: ${TRRSRV_MAC}
     restart: unless-stopped
 
 networks: 

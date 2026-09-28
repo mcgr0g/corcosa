@@ -72,6 +72,7 @@ services:
     volumes:
       - ./qbittorrent:/config
       - ${ROOT}/media:/media
+      - ${CERTS}:/config/certs
     ports:
       - 6881:6881 # tcp connection port
       - 8080:8080 # http gui

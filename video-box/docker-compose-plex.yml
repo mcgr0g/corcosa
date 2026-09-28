@@ -38,8 +38,8 @@ services:
       - 32414:32414/udp
     networks:
       elder_ip_subnet_type_c:
-        ipv4_address: ${IP_PLEX}
-        mac_address: ${MAC_PLEX}
+        ipv4_address: ${PLEX_IP}
+        mac_address: ${PLEX_MAC}
     restart: unless-stopped
 
 networks:
