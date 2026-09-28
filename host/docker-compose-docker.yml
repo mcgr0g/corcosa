@@ -1,0 +1,33 @@
+services:
+  wud:
+    # https://getwud.github.io/wud/#/quickstart/
+    image: getwud/wud:latest
+    container_name: wud
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./wud:/data
+    environment:
+      # https://getwud.github.io/wud/#/configuration/watchers/?id=variables
+      - WUD_TRIGGER_DOCKER_STONE_AUTO=true
+      # Настройка SMTP для отчетов
+      - WUD_TRIGGER_SMTP_GMAIL_AUTO=true
+      - WUD_TRIGGER_SMTP_GMAIL_HOST=smtp.gmail.com
+      # - WUD_TRIGGER_SMTP_GMAIL_PORT=25
+      - WUD_TRIGGER_SMTP_GMAIL_PORT=465
+      - WUD_TRIGGER_SMTP_GMAIL_TLS_ENABLED=true
+      - WUD_TRIGGER_SMTP_GMAIL_USER=server@gmail.com
+      - WUD_TRIGGER_SMTP_GMAIL_PASS=serveruserpass
+      - WUD_TRIGGER_SMTP_GMAIL_FROM_ADDRESS=server@gmail.com
+      - WUD_TRIGGER_SMTP_GMAIL_FROM_NAME=stone
+      - WUD_TRIGGER_SMTP_GMAIL_TO=kek@gmail.com
+      # Включение триггера обновлений
+      - WUD_WATCHER_LOCAL_CRON=0 1 * * *
+      - WUD_TRIGGER_DOCKER_AUTOUPDATE=true
+    labels:
+      # https://getwud.github.io/wud/#/configuration/watchers/?id=labels
+      # Пример: следить за всеми контейнерами
+      - wud.watch=true
+    ports:
+      - 3000:3000
+    restart: unless-stopped

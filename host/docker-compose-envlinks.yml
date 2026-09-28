@@ -1,0 +1,12 @@
+services:
+  envlinks:
+    image: maxhollmann/envlinks:latest
+    container_name: envlinks
+    ports:
+      - 88:80
+    environment:
+      - LINKS_TITLE=HomeLab Links
+      - LINKS_NEW_TAB=true # Открывать ссылки в новой вкладке браузера
+    env_file:
+      - $ENVFILE
+    restart: unless-stopped

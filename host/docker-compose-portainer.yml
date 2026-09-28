@@ -1,0 +1,15 @@
+---
+services:
+  portainer:
+    image: portainer/portainer-ce:sts
+    container_name: portainer
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - CHANGE_TO_COMPOSE_DATA_PATH/portainer/data:/data
+    ports:
+      - 9000:9000
+      - 9443:9443
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
