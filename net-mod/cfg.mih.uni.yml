@@ -81,6 +81,9 @@ proxy-providers:
     path: ./providers/vpnd-io-ws.yaml
     interval: 3600
     format: share
+    override:
+      additional-prefix: "WS | "
+      ip-version: ipv4 # IPv6-адреса нод недостижимы, dial падает
     health-check:
       enable: true
       url: https://cp.cloudflare.com/generate_204
@@ -92,6 +95,9 @@ proxy-providers:
     path: ./providers/vpnd-io-vless.yaml
     interval: 3600
     format: share
+    override:
+      additional-prefix: "VLESS | "
+      ip-version: ipv4 # IPv6-адреса нод недостижимы, dial падает
     health-check:
       enable: true
       url: https://cp.cloudflare.com/generate_204
